@@ -16,31 +16,25 @@ def computer(L, i = 0, words = False, noun = 0, verb = 0):
         0: use data to/from position x
         1: use x
     """
+    if L[i] == 99:
+        return L[0]
+    if L[i]//100%10 == 0:
+        s1 = L[L[i+1]]
+    else:
+        s1 = L[i+1]
+    if L[i]//1000%10 == 0:
+        s2 = L[L[i+2]]
+    else:
+        s2 = L[i+2]
     if words:
         L[1] = noun
         L[2] = verb
     if L[i]%10 == 1:
         # print(1)
-        if L[i]//100%10 == 0:
-            s1 = L[L[i+1]]
-        else:
-            s1 = L[i+1]
-        if L[i]//1000%10 == 0:
-            s2 = L[L[i+2]]
-        else:
-            s2 = L[i+2]
         L[L[i+3]] = s1 + s2
         return computer(L, i+4)
     elif L[i]%10 == 2:
         # print(2)
-        if L[i]//100%10 == 0:
-            s1 = L[L[i+1]]
-        else:
-            s1 = L[i+1]
-        if L[i]//1000%10 == 0:
-            s2 = L[L[i+2]]
-        else:
-            s2 = L[i+2]
         L[L[i+3]] = s1 * s2
         return computer(L, i+4)
     elif L[i]%10 == 3:
@@ -50,55 +44,19 @@ def computer(L, i = 0, words = False, noun = 0, verb = 0):
         print(L[L[i+1]])
         return computer(L, i+2)
     elif L[i]%10 == 5:
-        if L[i]//100%10 == 0:
-            if L[L[i+1]] != 0:
-                if L[i]//1000%10 == 0: return computer(L, L[L[i+2]])
-                else: return computer(L, L[i+2])
-            else:
-                return computer(L, i+3)
-        else:
-            if L[i+1] != 0:
-                if L[i]//1000%10 == 0: return computer(L, L[L[i+2]])
-                else: return computer(L, L[i+2])
-            else:
-                return computer(L, i+3)
+        if s1 != 0: return computer(L, s2)
+        else: return computer(L, i+3)
     elif L[i]%10 == 6:
-        if L[i]//100%10 == 0:
-            if L[L[i+1]] == 0:
-                if L[i]//1000%10 == 0: return computer(L, L[L[i+2]])
-                else: return computer(L, L[i+2])
-            else: return computer(L, i+3)
-        else:
-            if L[i+1] == 0:
-                if L[i]//1000%10 == 0: return computer(L, L[L[i+2]])
-                else: return computer(L, L[i+2])
-            else: return computer(L, i+3)
+        if s1 == 0:return computer(L, s2)
+        else: return computer(L, i+3)
     elif L[i]%10 == 7:
-        if L[i]//100%10 == 0:
-            s1 = L[L[i+1]]
-        else:
-            s1 = L[i+1]
-        if L[i]//1000%10 == 0:
-            s2 = L[L[i+2]]
-        else:
-            s2 = L[i+2]
         if s1 < s2: L[L[i+3]] = 1
         else: L[L[i+3]] = 0
         return computer(L, i+4)
     elif L[i]%10 == 8:
-        if L[i]//100%10 == 0:
-            s1 = L[L[i+1]]
-        else:
-            s1 = L[i+1]
-        if L[i]//1000%10 == 0:
-            s2 = L[L[i+2]]
-        else:
-            s2 = L[i+2]
         if s1 == s2: L[L[i+3]] = 1
         else: L[L[i+3]] = 0
         return computer(L, i+4)
-    elif L[i] == 99:
-        return L[0]
     else:
         return("Error at index " + str(i) + ", which equals " + str(L[i]) + ".")
     
