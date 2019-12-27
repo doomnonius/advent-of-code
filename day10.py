@@ -12,10 +12,50 @@ def los(S):
         # move out in each direction
         x0 = x
         y0 = y
-        while x < 26:
-            x += 1
-            if L[y][x] == :
-                return
+        total = 0
+
+        def angles(x0, y0, quadrant, L):
+            """ Takes the list and returns all possible angles for a particular quadrant in a list. Doesn't account for the axes.
+            Quadrants are TR, TL, BR, BL.
+            """
+            L = []
+            x = 25
+            y = 25
+            if quadrant == "TR":
+                x_mod = 1
+                y_mod = 1
+                x_diff = 26 - x
+                y_diff = 26 - y
+                top = 26
+            elif quadrant == "TL":
+                x_mod = -1
+                y_mod = 1
+                x_diff = x
+                y_diff = 26-y
+                top = 26
+            elif quadrant == "BR":
+                x_mod = 1
+                y_mod = -1
+                x_diff = 26-x
+                y_diff = y
+                top = 0
+            elif quadrant == "BL":
+                x_mod = -1
+                y_mod = -1
+                x_diff = x
+                y_diff = y
+                top = 0
+            else:
+                raise ValueError
+
+            for y in range(min(y0+y_mod,top),max(y0+y_mod,top)):
+                while x > x0:
+                    if [x, y] not in L: L.append([x, y])
+                    x -= 1
+                x = 25
+
+
+            return L
     
     grid = []
     answers = []
