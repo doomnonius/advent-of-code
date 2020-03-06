@@ -1,6 +1,43 @@
+from itertools import permutations
+
 inp = "#.#.###.#.#....#..##.#.........#..#..#..#.#..#.....#.##.##.##.##.##..#...#...##.#...#.#####...###.#.#.#..#####.###.#.#.####.#####.#.#.#.##.#.##...####.#.##.##....###..#.#..#..#..###...##....#.#...##.#.#...####.....#.#######..##.##.#..#.###.#..###.#.#..##.....###.#.#.##.#......#####..###..##.#.##..###.##.###..###..#.###...#.#...#..#.##.#.#..#.#....###.#.#..##.#.##.##.#####..###...#.###.###...##..#..##.##.#.##..####.#.###.###.....####.##..#######....#.##....###.#..#..##.#.####.....###..##.#.#..#..#...#.####..######..#####.##...#.#....#....#.#.#####.##.#.#####..##.#...#..##..##.#.##.##.####..##.##..####..#..####.########.#..#.##.#.######....##...#.##.##.####......#.##.##"
 h = 26
 w = 26
+
+def common(L):
+    """ Finds if two numbers have a common factor. Returns True if they do not.
+    """
+    n = 0
+
+    for i in range(2, min(L)+1):
+        if L[0]%i==L[1]%i==0:
+            n += 1
+    
+    if n > 0:
+        return False
+    else:
+        return True
+
+angles_list = list(filter(lambda x: x[0] == 1 or (x[0]<x[1] and common(x)), list(permutations(range(1,26), 2)))) #permutations returns a list of lists
+
+def count(S, w, h):
+    """Takes a string of asteroid belt data and finds the spot that can see the most asteroids, and how many asteroids it can see.
+    """
+    # first I need to split the string into the rows
+    
+    while x := 0 < len(S):
+        if S[x] == ".":
+            # do the counting thing
+            # move right
+
+            # move down
+
+            # move left
+
+            # move up
+
+        x += 1
+
 
 def los(S):
     """Takes a string of asteroid belt data and returns the spot that can see the most asteroids, and how many asteroids it can see.
@@ -31,12 +68,12 @@ def los(S):
                 x_mod = -1
                 y_mod = 1
                 x_diff = x
-                y_diff = 26-y
+                y_diff = 26 - y
                 top = 26
             elif quadrant == "BR":
                 x_mod = 1
                 y_mod = -1
-                x_diff = 26-x
+                x_diff = 26 - x
                 y_diff = y
                 top = 0
             elif quadrant == "BL":
