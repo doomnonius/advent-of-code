@@ -27,15 +27,10 @@ def count(S, h):
     """Takes a string of asteroid belt data and finds the spot that can see the most asteroids, and how many asteroids it can see.
     """
     
-    def math_part(point, quadrant, boo, c, z = 0):
-        """ Takes a point, a quadrant and a boolean and figures things out for that quadrant.
+    def math_part(point, quadrant, c, z = 0):
+        """ Takes a point and a quadrant and figures things out for that quadrant.
         Quadrants are: RU, RD, LD, LU
         """
-
-        if boo == True:
-            a.insert(0, (1,0))
-        else:
-            a.insert(0, (0,1))
 
         if quadrant[1] == "U":
             m = -1
@@ -54,13 +49,13 @@ def count(S, h):
         # print(i, ",", j)
         # print(quadrant)
         while True:
-            if x1 + j*n < w and y1 + m*i < h:
-                print(x1+j*n<w)
-                print([quadrant, c, y+i*m, x+j*n])
+            if 0 <= x1 + j*n < w and 0 <= y1 + m*i < h:
+                # print(x1+j*n<w)
+                # print([quadrant, c, y1+i*m, x1+j*n])
                 if complete[y1 + (m*i)][x1 + (j*n)] == "#":
                     c += 1
-                    if c == 200:
-                        print(x1*100 + y)
+                    if c == 200: answer = (x1 + (j*n))*100 + y1 + (m*i)
+                    elif c < 200: answer = 0
                     if z < len(a)-1: z += 1
                     else: break
                     i, j = a[z][0], a[z][1]
@@ -73,15 +68,14 @@ def count(S, h):
                 else: break
                 i, j = a[z][0], a[z][1]
                 # print(i, ",", j)
-        a.pop(0)
-        return(c)
-        
+        # a.pop(0)
+        return(c, answer)
     
     # first I need to split the string into the rows
     total = len(S)
     # print(total)
     w = total/h
-    print(w)
+    # print(w)
     complete = []
     x = 0
     pointer = 0
@@ -96,101 +90,44 @@ def count(S, h):
         pointer = 0
         x += 1
     # print(complete)
-    x, y, c = 0, 0, 0
-    results = []
-    while y < h:
-        while x < w:
-            if complete[y][x] == "#":
-                c = math_part((y,x), "RU", True, c)
-                c = math_part((y,x), "RD", False, c)
-                c = math_part((y,x), "LD", True, c)
-                c = math_part((y,x), "LU", True, c)
+    # x, y, c = 0, 0, 0
+    c = 0
+    # results = []
+
+    # the point is known
+
+    # while y < h:
+    #     while x < w:
+    #         if complete[y][x] == "#":
+    a.sort(key = lambda x: x[0]/x[1], reverse=True)
+    a.insert(0, (1,0))
+    # print(a)
+    c, answer = math_part((17,13), "RU", c)
+    a.pop(0)
+
+    a.sort(key = lambda x: x[0]/x[1])
+    a.insert(0, (0,1))
+    c, answer = math_part((17,13), "RD", c)
+    a.pop(0)
+    
+    a.sort(key = lambda x: x[0]/x[1], reverse=True)
+    a.insert(0, (1,0)) #sorted so that 1,0 is first
+    c, answer = math_part((17,13), "LD", c)
+    a.pop(0)
+
+    a.sort(key = lambda x: x[0]/x[1])
+    a.insert(0, (0,1)) # sorted so 0,1 is first
+    c, answer = math_part((17,13), "LU", c)
                 # add count to results table
-                results.append(c)
-                c = 0
-            x += 1 # this increments the check for clear spaces
-        x = 0
-        y += 1
+        #         results.append(c)
+        #         if c == 269:
+        #             print("Point:", y, ",", x)
+        #         c = 0
+        #     x += 1 # this increments the check for clear spaces
+        # x = 0
+        # y += 1
     
     # results.sort(key=lambda x: x[1])
-    return max(results)
-
-
-# def los(S):
-#     """Takes a string of asteroid belt data and returns the spot that can see the most asteroids, and how many asteroids it can see.
-#     """
-    
-#     def count(x, y, L):
-#         """ Takes an x,y coordinate and returns how many asteroids are visible from that location.
-#         """
-#         # move out in each direction
-#         x0 = x
-#         y0 = y
-#         total = 0
-
-#         def angles(x0, y0, quadrant, L):
-#             """ Takes the list and returns all possible angles for a particular quadrant in a list. Doesn't account for the axes.
-#             Quadrants are TR, TL, BR, BL.
-#             """
-#             L = []
-#             x = 25
-#             y = 25
-#             if quadrant == "TR":
-#                 x_mod = 1
-#                 y_mod = 1
-#                 x_diff = 26 - x
-#                 y_diff = 26 - y
-#                 top = 26
-#             elif quadrant == "TL":
-#                 x_mod = -1
-#                 y_mod = 1
-#                 x_diff = x
-#                 y_diff = 26 - y
-#                 top = 26
-#             elif quadrant == "BR":
-#                 x_mod = 1
-#                 y_mod = -1
-#                 x_diff = 26 - x
-#                 y_diff = y
-#                 top = 0
-#             elif quadrant == "BL":
-#                 x_mod = -1
-#                 y_mod = -1
-#                 x_diff = x
-#                 y_diff = y
-#                 top = 0
-#             else:
-#                 raise ValueError
-
-#             for y in range(min(y0+y_mod,top),max(y0+y_mod,top)):
-#                 while x > x0:
-#                     if [x, y] not in L: L.append([x, y])
-#                     x -= 1
-#                 x = 25
-
-
-#             return L
-    
-#     grid = []
-#     answers = []
-#     i = 0
-#     while i < 26:
-#         grid.append(S[0:25])
-#         try: S = S[26:]
-#         except: S = []
-#     x = 0
-#     y = 0
-#     for j in grid:
-#         for k in j:
-#             if k == "#":
-#                 answers.append((x, y), count(x,y, grid))
-#             x += 1
-#         y += 1
-#         x = 0
-    
-    
-#     answers.sort(key=lambda x: x[1], reverse=True)
-#     return answers
-
+    return c, answer
 
 print(count(inp, h))
