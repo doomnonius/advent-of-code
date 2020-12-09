@@ -6,7 +6,7 @@ def all_yes(form):
 if __name__ == "__main__":
 	import os
 	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-	with open(FILE_DIR + "\\day6.input") as f:
+	with open(os.path.join(FILE_DIR, "day6.input")) as f:
 		DATA = f.read().strip()
 	FORMS = DATA.split("\n\n")
 	# print(sum(all_yes(a) for a in FORMS)) # old solution
