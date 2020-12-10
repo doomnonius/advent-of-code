@@ -44,4 +44,4 @@ if __name__ == "__main__":
 		DATA = f.read().strip()
 	INSTRUCTIONS = DATA.split("\n")
 	print(f"Part one: {run_code(INSTRUCTIONS)[0]}")
-	print(f"{[run_code(x)[0] for x in make_alternates(INSTRUCTIONS) if run_code(x)[1] == True]}")
+	print(f"Part two: {[answer[0] for x in make_alternates(INSTRUCTIONS) if (answer := run_code(x))[1] == True][0]}")
