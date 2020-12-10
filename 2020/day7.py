@@ -1,39 +1,46 @@
 import re
+from typing import Dict, List
 
 class Bag:
 	def __init__(self, rule):
-		base_pat = r'(\w+\s\w+)\sbags\scontain\s?(\d?)\s(\w+\s\w+)\sbags?'
+		base_pat = r'(\w+ \w+) bags contain\s?(\d?) (\w+ \w+) bags?'
 		commas = rule.count(",")
 		i = 0
 		while i < commas:
-			base_pat += (r",\s?(\d?)\s(\w+\s\w+)\sbags?")
+			base_pat += (r", (\d) (\w+ \w+) bags?")
 			i += 1
 		colors = re.match(base_pat, rule)
-		self.color = colors.group(1)
-		self.holds = {colors.group(3):colors.group(2)}
-		i = 0
-		while i < 2*commas:
-			self.holds[colors.group(i+5)] = int(colors.group(i+4))
-			i += 2
+		if colors == None: # ie no other bags
+			self.color = re.match(r'(\w+ \w+) bags contain\s', rule).group(1)
+			self.holds = {}
+		else:
+			self.color = colors.group(1)
+			self.holds = {colors.group(3):colors.group(2)}
+			i = 0
+			while i < 2*commas:
+				self.holds[colors.group(i+5)] = int(colors.group(i+4))
+				i += 2
 		self.unknown_contains = self.holds.copy()
 
 # x = Bag("faded blue bags contain no other bags.")
 # print(x.color)
 # print(x.holds)
 
-def check_bag(rules, color=None):
-	""" Checks for shiny gold.
-	"""
-	for x in rules:
-		if "shiny gold" in x.holds:
-			return x.color
-		elif "no other" in x.holds:
-			continue
-		else:
-			for y in x.holds:
-				next_rule = [z for z in rules if z.color == y]
-				if check_bag(rules, next_rule[0]) == None:
-					continue
+# I lifted these next two straight from Clint's solution
+def build_reversed_bag_hash(bash_hash: Dict[str, Bag]):
+	reversed_hash = {}
+	for color in bags_hash.keys():
+		reversed_hash[color] = [x.color for x in bags_hash.values() if color in x.holds.keys()]
+	return reversed_hash
+
+def get_all_containing_bags(reversed_bag_hash: Dict[str, List[str]], to_find: str):
+	current_set = {to_find}
+	while True:
+		start_set = current_set.copy()
+		for color in start_set:
+			current_set.update(reversed_bag_hash[color])
+		if start_set == current_set:
+			return current_set - {to_find}
 
 if __name__ == "__main__":
 	import os
@@ -41,10 +48,10 @@ if __name__ == "__main__":
 	with open(os.path.join(FILE_DIR, "day7.input")) as f:
 		DATA = f.read().strip()
 	RULES = DATA.split("\n")
-	x = []
-	r = 0
-	for r in RULES:
-		x.append(Bag(r))
+	bags = [Bag(x) for x in RULES]
+	bags_hash = {x.color: x for x in bags}
+	reversed_hash = build_reversed_bag_hash(bags_hash)
+	part_one_bags = get_all_containing_bags(reversed_hash, 'shiny gold')
 	
-	# print(f"Part one: {sum(z for y in x if )}")
+	print(f"Part one: {len(part_one_bags)} bags can contain shiny gold.")
 	# print(f"Part two: {}")
