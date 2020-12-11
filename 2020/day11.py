@@ -11,7 +11,7 @@ def game_o_life(rows):
 			return count
 		rows = new_seating.copy()
 		# print(new_seating)
-		# print(f"Run: {t}")
+		print(f"GoL 1, run: {t}")
 
 def permutate(rows):
 	height = len(rows)
@@ -45,7 +45,21 @@ def permutate(rows):
 		new_row = ""
 	return new_seating, count
 
-def count_seen(rows, row, seat, row_length, height):
+def count_seen(rows, row, seat, width, height):
+	
+	def check_dir(rise_run):
+		nav_row, nav_seat = row, seat
+		while 0 < nav_row < height-1 and 0 < nav_seat < width-1:
+			nav_row += rise_run[0]
+			nav_seat += rise_run[1]
+			if (spot := rows[nav_row][nav_seat]) != ".":
+				if spot == "#":
+					return 1
+				return 0
+		return 0
+	
+	dirs = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+	
 	count = 0
 	# check up-left
 	nav_row = row
@@ -69,7 +83,7 @@ def count_seen(rows, row, seat, row_length, height):
 	# check up-right
 	nav_row = row
 	nav_seat = seat
-	while nav_row > 0 and nav_seat < row_length-1:
+	while nav_row > 0 and nav_seat < width-1:
 		nav_row -= 1
 		nav_seat += 1
 		if (spot := rows[nav_row][nav_seat]) != ".":
@@ -88,7 +102,7 @@ def count_seen(rows, row, seat, row_length, height):
 	# check right
 	nav_row = row
 	nav_seat = seat
-	while nav_seat < row_length-1:
+	while nav_seat < width-1:
 		nav_seat += 1
 		if (spot := rows[nav_row][nav_seat]) != ".":
 			if spot == "#":
@@ -116,14 +130,18 @@ def count_seen(rows, row, seat, row_length, height):
 	# check down-right
 	nav_row = row
 	nav_seat = seat
-	while nav_row < height-1 and nav_seat < row_length-1:
+	while nav_row < height-1 and nav_seat < width-1:
 		nav_row += 1
 		nav_seat += 1
 		if (spot := rows[nav_row][nav_seat]) != ".":
 			if spot == "#":
 				count += 1
 			break
-	# print(count)
+	asse = sum(check_dir(x) for x in dirs)
+	try:
+		assert(asse == count)
+	except AssertionError:
+		print(f"sum: {asse}, count: {count}")
 	return count
 
 def count_adj(rows, seat, row_length):
@@ -152,6 +170,67 @@ def count_adj(rows, seat, row_length):
 	# print(f"Seat: {seat}, num_adj_filled: {filled}")
 	return len(filled)
 
+import numpy as np
+
+def game_o_life2(rows):
+	# convert rows to a numpy array
+	new_array = []
+	for row in rows:
+		new_row = []
+		for seat in row:
+			if seat == ".":
+				new_row.append(0)
+			elif seat == "#":
+				new_row.append(2)
+			else:
+				new_row.append(1)
+		new_array.append(new_row)
+	a = np.array(new_array)
+	# print(a)
+	
+	while True:
+		new_seating, count = permutate2(a)
+		if np.array_equal(rows, new_seating):
+			return count
+		rows = new_seating.copy()
+
+def permutate2(rows):
+	height = len(rows)
+	width = len(rows[0])
+	count = 0
+	original = rows.copy()
+	for row in range(height):
+		for seat in range(width):
+			# print(f"Seat: {seat}")
+			if rows[row][seat] == 0:
+				rows[row][seat] = 0
+			elif rows[row][seat] == 1 and count_seen2(original, row, seat, width, height) == 0:
+				rows[row][seat] = 2
+				count += 1
+			elif rows[row][seat] == 2 and count_seen2(original, row, seat, width, height) > 4:
+				rows[row][seat] = 1
+				count -= 1
+			elif rows[row][seat] == 2:
+				count += 1
+	return rows, count
+
+def count_seen2(rows, row, seat, width, height):
+	
+	def check_dir(rise_run):
+		nav_row, nav_seat = row, seat
+		while 0 < nav_row < height-1 and 0 < nav_seat < width-1:
+			nav_row += rise_run[0]
+			nav_seat += rise_run[1]
+			if (spot := rows[nav_row][nav_seat]) != 0:
+				if spot == 2:
+					return 1
+				return 0
+		return 0
+	
+	dirs = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+	
+	return sum(check_dir(x) for x in dirs)
+
 if __name__ == "__main__":
 	import os
 	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -160,4 +239,6 @@ if __name__ == "__main__":
 	ROWS = DATA.split("\n")
 	# print(f"Part one: {game_o_life(ROWS)}") # -> 2178
 	print(f"Part two: {game_o_life(ROWS)}") # -> 1978
-	print(f"{timeit.timeit('game_o_life(ROWS)', setup='from __main__ import game_o_life, ROWS', number=1)}") # -> 0.949
+	print(f"{timeit.timeit('game_o_life(ROWS)', setup='from __main__ import game_o_life, ROWS', number=1)}") # -> 0.949 for part two, 0.942 for part one
+
+	print(f"With numpy: {game_o_life2(ROWS)}")
