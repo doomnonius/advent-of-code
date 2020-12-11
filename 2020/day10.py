@@ -1,4 +1,5 @@
 from typing import Set, List
+import timeit
 
 def jolting(jolts: List):
 	i = 1
@@ -13,7 +14,7 @@ def jolting(jolts: List):
 	threes = diffs.count(3)
 	return ones * threes, solids
 
-def variations(jolts: List, threes: List): # so the threes are the "solid" points
+def variations(jolts: List, threes: List):
 	for i in range(len(jolts)):
 		if jolts[i] in threes:
 			jolts[i] = str(jolts[i])
@@ -21,12 +22,11 @@ def variations(jolts: List, threes: List): # so the threes are the "solid" point
 	sub = []
 	c = 1
 	while i < len(jolts):
-		# find all arrangements where there is never a difference of more than 3
 		if type(jolts[i]) == str:
 			sub.append(int(jolts[i]))
 			if len(sub) > 1:
-				c *= len(possibilities(sub))
-				print(c)
+				l = possibilities(sub)
+				c *= len(l)
 				sub = [int(jolts[i])]
 		else:
 			sub.append(jolts[i])
@@ -37,21 +37,22 @@ def possibilities(subset: List):
 	""" First and last will be solids. Return a list?
 	"""
 	i = 1
-	options = [subset]
-	print(f"subset: {subset}")
+	reset = subset.copy()
+	options = [reset]
 	while i < len(subset): # if diff between any two is greater than 3, return empty list
 		if subset[i] - subset[i-1] > 3:
 			return []
 		i += 1
 	if len(subset) == 2:
 		return options
-	reset = subset.copy()
 	i = 1
 	l = len(subset)-1
 	while i < l:
-		print(f"subset: {subset}")
 		subset.remove(subset[i])
-		options.extend(possibilities(subset))
+		r = possibilities(subset)
+		for x in r:
+			if x not in options:
+				options += [x]
 		i += 1
 		subset = reset.copy()
 	return options # need to return all the unique options
@@ -61,22 +62,11 @@ if __name__ == "__main__":
 	import os
 	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 	with open(os.path.join(FILE_DIR, "day10.input")) as f:
-		# DATA = f.read().strip()
-		pass
-	DATA = """16
-10
-15
-5
-1
-11
-7
-19
-6
-12
-4"""
+		DATA = f.read().strip()
 	JOLTAGES = [int(x) for x in DATA.split("\n")]
 	J = [0] + sorted(JOLTAGES) + [max(JOLTAGES)+3]
 	# print(J)
 	j = jolting(J)
-	print(f"Part one: {j[0]}") # not 1890, too low
-	print(f"Part two: {variations(J, j[1])}")
+	print(f"Part one: {j[0]}") # not 1890, too low -> 1984
+	print(f"Part two: {variations(J, j[1])}") #  first try -> 3543369523456
+	print(f"{timeit.timeit('variations(J, j[1])', setup= 'from __main__ import variations, J, j', number=1000)}") #0.2640735 for 1000 executions
