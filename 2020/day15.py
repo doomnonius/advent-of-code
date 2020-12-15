@@ -1,7 +1,3 @@
-from typing import Set, Dict
-from functools import lru_cache
-
-
 def memory_game(stop_point: int, *numbers):
 	nums = {}
 	i = 0
@@ -30,7 +26,5 @@ if __name__ == "__main__":
 		DATA = f.read().strip()
 	DATA = [int(x) for x in DATA.split(",")]
 	print(f"Part one: {memory_game(2020, *DATA)}")
-	print(datetime.datetime.now())
 	print(f"Part two: {memory_game(30000000, *DATA)}")
-	print(datetime.datetime.now())
-	print(f"Timed: {timeit.timeit('memory_game(30000000, *DATA)', setup='from __main__ import DATA, memory_game', number=1)}")
+	# print(f"Timed: {timeit.timeit('memory_game(30000000, *DATA)', setup='from __main__ import DATA, memory_game', number=1)}")
