@@ -1,36 +1,36 @@
-from typing import List, Dict
+from typing import Set, Dict
+from functools import lru_cache
 
-def memory_game(numbers: List[int], stop_point: int):
+
+def memory_game(stop_point: int, *numbers):
 	nums = {}
 	i = 0
-	while i < len(numbers)-1:
-		nums[numbers[i]] = i
+	for x in numbers:
+		if x in numbers[0:-1]:
+			nums[x] = i
 		i += 1
+		last_num = x
 	while i < stop_point:
-		if numbers[i] in nums.keys() and nums[numbers[i]] != None: # if it exists:
-			diff = i-nums[numbers[i]]
-			numbers.append(diff) # next num is difference
-			nums[numbers[i]] = i # update last occurence
-		else: # if it doesn't:
-			numbers.append(0) # append 0
-			nums[numbers[i]] = i
-			if 0 in nums.keys():
-				if nums[0] == None:
-					nums[0] = i # update last occurence
-			else:
-				nums[0] = None
+		prev_num = last_num
+		if last_num in nums.keys():
+			diff = i-nums[last_num]-1
+			last_num = diff 
+		else:
+			last_num = 0
+		nums[prev_num] = i-1
 		i += 1
-	return numbers[-2]
+	return last_num
 	
-TEST_DATA = """3,1,2"""
+TEST_DATA = """1,3,2"""
 
 if __name__ == "__main__":
-	import os, datetime
+	import os, datetime, timeit
 	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 	with open(os.path.join(FILE_DIR, "day15.input")) as f:
 		DATA = f.read().strip()
 	DATA = [int(x) for x in DATA.split(",")]
-	print(f"Part one: {memory_game(DATA, 2020)}")
+	print(f"Part one: {memory_game(2020, *DATA)}")
 	print(datetime.datetime.now())
-	print(f"Part one: {memory_game(DATA, 30000000)}")
+	print(f"Part two: {memory_game(30000000, *DATA)}")
 	print(datetime.datetime.now())
+	print(f"Timed: {timeit.timeit('memory_game(30000000, *DATA)', setup='from __main__ import DATA, memory_game', number=1)}")
