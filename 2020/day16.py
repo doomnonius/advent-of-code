@@ -58,7 +58,7 @@ def name_rows(tickets, rules, mine):
 
 
 if __name__ == "__main__":
-	import os, datetime, timeit
+	import os, timeit
 	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 	with open(os.path.join(FILE_DIR, "day16.input")) as f:
 		DATA = f.read().strip()
@@ -68,3 +68,4 @@ if __name__ == "__main__":
 	NEARBY = [x.split(",") for x in NEARBY.split("\n")[1:]]
 	print(f"Part one: {check_tickets(NEARBY, RULES)[0]}") # not 670425, too high; -> 29019
 	print(f"Part two: {name_rows(remove_tickets(NEARBY, RULES), RULES, MINE)}")
+	print(f"Time: {timeit.timeit('name_rows(remove_tickets(NEARBY, RULES), RULES, MINE)', setup='from __main__ import name_rows, remove_tickets, NEARBY, RULES, MINE', number=1)}") #0.004
