@@ -8,10 +8,6 @@ class Coord:
 	def __repr__(self):
 		return f"{(self.y, self.x)}"
 
-	def __lt__(self, other):
-		if ((self.x < other.x or self.x > other.x) and (other.y == self.y)) or ((self.y < other.y or self.y > other.y) and (other.x == self.x)):
-			return True
-
 class Wire:
 	def __init__(self, directions: List[str]):
 		corners = [Coord(0,0)]

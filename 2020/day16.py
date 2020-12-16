@@ -20,13 +20,10 @@ def check_tickets(nearby, rules):
 				count += int(number)
 				invalid.append(ticket)
 				continue
-	return count, invalid
-
-def remove_tickets(nearby, rules):
-	invalid = check_tickets(nearby, rules)[1]
 	for ticket in invalid:
 		nearby.remove(ticket)
-	return nearby
+	return count, nearby
+
 
 def name_rows(tickets, rules, mine):
 	potentials = []
@@ -67,5 +64,5 @@ if __name__ == "__main__":
 	MINE = MINE.split("\n")[1].split(",")
 	NEARBY = [x.split(",") for x in NEARBY.split("\n")[1:]]
 	print(f"Part one: {check_tickets(NEARBY, RULES)[0]}") # not 670425, too high; -> 29019
-	print(f"Part two: {name_rows(remove_tickets(NEARBY, RULES), RULES, MINE)}")
-	print(f"Time: {timeit.timeit('name_rows(remove_tickets(NEARBY, RULES), RULES, MINE)', setup='from __main__ import name_rows, remove_tickets, NEARBY, RULES, MINE', number=1)}") #0.004
+	print(f"Part two: {name_rows(check_tickets(NEARBY, RULES)[1], RULES, MINE)}")
+	print(f"Time: {timeit.timeit('name_rows(check_tickets(NEARBY, RULES)[1], RULES, MINE)', setup='from __main__ import name_rows, check_tickets, NEARBY, RULES, MINE', number=1)}") #0.0048

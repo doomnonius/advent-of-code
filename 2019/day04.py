@@ -1,75 +1,58 @@
-""" How many #s in given range meet criteria for password?
-- never a decrease moving left to right
-- at least one instance of a duplicate number, and it only counts if only a duplicate
-- 
-"""
-# correct answer 1145 (noting so that I can check after optimizations)
-r = (168630, 718098)
-# r = (168630, 170000)
-
 def test_range(r):
-    low = r[0]
-    hits = 0
-    x = 0
-    while x < 5:
-        # print(low, x, low[x])
-        # check for rule one
-        # if int(low) > int(r[1]): break
-        if low > r[1]: break
-        # if int(low[x]) > int(low[x+1]):
-        #     low = str(int(low)+10**(4-x))
-        #     x = 0
-        #     continue
-        d1 = low//(10**(5-x))%10
-        d2 = low//(10**(4-x))%10
-        # print(d1, d2)
-        if d1 > d2:
-            low += 10**(4-x)*(d1-d2)
-            x = 0
-            continue
-        # check for rule two and three
-        if x == 4:
-            # L = [int(low[i]) for i in range(len(low))]
-            L = [low//(10**(5-i))%10 for i in range(6)]
-            # print(L)
-            j = []
-            k = []
-            l = []
-            m = []
-            n = []
-            for i in L:
-                if i in j or j == []:
-                    j.append(i)
-                    continue
-                if i in k or k == []:
-                    k.append(i)
-                    continue
-                if i in l or l == []:
-                    l.append(i)
-                    continue
-                if i in m or m == []:
-                    m.append(i)
-                    continue
-                if i in n or n == []:
-                    n.append(i)
-                    continue
-            # print(j,k,l,m,n)
-            if len(j) == 2 or len(k) == 2 or len(l) == 2 or len(m) == 2 or len(n) == 2:
-                print(low)
-                hits += 1
-                # break
-            # for i in range(len(low)-1):
-            #     if low[i] == low[i+1] and i < 4 and low[i] != low[i+2] and i > 0 and low[i] != low[i-1]:
-            #         print(low)
-            #         hits += 1
-            #         # low = str(int(low) + 1)
-            #         break
-            low += 1
-            x = 0
-            continue
-        x += 1
-    # print(low)
-    return hits
+	rule_1 = test_increase(r)
+	return test_adjacent(rule_1), test_adjacent_v2(rule_1)
 
-# 690 was too low
-print(test_range(r))
+def test_increase(r):
+	low = r[0]
+	high = r[1]
+	hits = []
+	x = 0
+	while low < high:
+		while x < 5:
+			d1 = low//(10**(5-x))%10
+			d2 = low//(10**(4-x))%10
+			if d1 > d2:
+				low += (10**(4-x)*(d1-d2))//10**(4-x)
+				x = 0
+				continue
+			x += 1
+		if low < high: hits.append(low)
+		low += 1
+		x = 0
+	return hits
+
+def test_adjacent(numbers):
+	count = 0
+	hit = False
+	for x in numbers:
+		x = str(x)
+		for i in range(len(x)-1):
+			if x[i] == x[i+1]:
+				hit = True
+		if hit:
+			count += 1
+			hit = False
+	return count
+
+def test_adjacent_v2(numbers):
+	hits = 0
+	hit = True
+	for x in numbers:
+		x = str(x)
+		for char in x:
+			if x.count(char) > 2:
+				hit = False
+		if not hit:
+			hits += 1
+			hit = True
+	return hits
+
+
+
+
+if __name__ == "__main__":
+	import timeit
+	DATA = [int(x) for x in "307237-769058".split('-')]
+	print(f"Part one: {test_range(DATA)[0]}") # not 442, too low; nor 695, also low; -> 889, was skipping 333333-336999
+	print(f"Part two: {test_range(DATA)[1]}") # not 540, too low; 
+	print(f"Time: {timeit.timeit('test_range(DATA)', setup='from __main__ import test_range, DATA', number = 1)}")
