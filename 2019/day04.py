@@ -36,23 +36,25 @@ def test_adjacent(numbers):
 
 def test_adjacent_v2(numbers):
 	hits = 0
-	hit = True
+	hit = False
 	for x in numbers:
 		x = str(x)
 		for char in x:
-			if x.count(char) > 2:
+			if x.count(char) == 2:
+				hit = True
+				break
+			elif x.count(char) > 2:
 				hit = False
-		if not hit:
+		if hit:
 			hits += 1
-			hit = True
+			hit = False
+		# else:
+			# print(f"True: {x}")
 	return hits
-
-
-
 
 if __name__ == "__main__":
 	import timeit
 	DATA = [int(x) for x in "307237-769058".split('-')]
 	print(f"Part one: {test_range(DATA)[0]}") # not 442, too low; nor 695, also low; -> 889, was skipping 333333-336999
-	print(f"Part two: {test_range(DATA)[1]}") # not 540, too low; 
+	print(f"Part two: {test_range(DATA)[1]}") # not 540, too low; nor 465, also low; not 596, too high; 
 	print(f"Time: {timeit.timeit('test_range(DATA)', setup='from __main__ import test_range, DATA', number = 1)}")
