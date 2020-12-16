@@ -54,14 +54,14 @@ def find_timestamp(buses: List[Bus]) -> int:
 
 
 TEST_DATA = """939
-7,13,x,x,59,x,31,19"""
+17,x,13,19"""
 
 if __name__ == "__main__":
 	import os, datetime
 	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 	with open(os.path.join(FILE_DIR, "day13.input")) as f:
 		DATA = f.read().strip()
-	DATA = DATA.split("\n")
+	DATA = TEST_DATA.split("\n")
 	ARRIVAL, SCHEDULE = int(DATA[0]), DATA[1]
 	BUSES = [Bus(int(val), i) for i, val in enumerate(SCHEDULE.split(",")) if val != "x"]
 	# SCHED = SCHEDULE.split(",")
