@@ -1,17 +1,16 @@
-def operations_ooo(equation: str) -> str:
-	# print(equation)
+def operations_ooo(equation: str, two=False) -> str:
 	l = len(equation)
 	if "(" not in equation:
 		equation.replace(")", '')
+		if two: return operations_p2(equation)
 		return operations_p1(equation)
 	p_loc = equation.index("(")
 	pc_loc = p_match(equation, p_loc)
-	# print(f"open: {p_loc}; close: {pc_loc}")
 	if pc_loc + 1 == l:
-		equation = equation[0:p_loc] + operations_ooo(equation[p_loc+1:pc_loc])
+		equation = equation[0:p_loc] + operations_ooo(equation[p_loc+1:pc_loc], two)
 	else:
-		equation = equation[0:p_loc] + operations_ooo(equation[p_loc+1:pc_loc]) + equation[pc_loc+1:]
-	return(operations_ooo(equation))
+		equation = equation[0:p_loc] + operations_ooo(equation[p_loc+1:pc_loc], two) + equation[pc_loc+1:]
+	return(operations_ooo(equation, two))
 
 
 def p_match(equation, loc) -> int:
@@ -32,24 +31,32 @@ def p_match(equation, loc) -> int:
 
 def operations_p1(equation: str) -> str:
 	parts = equation.split()
-	# print(parts)
 	retVal = parts[0]
 	i = 1
 	while i < len(parts):
 		retVal = str(eval(retVal + parts[i] + parts[i+1]))
 		i += 2
-	# print(f"retVal: {retVal}")
 	return retVal
 
 
 def operations_p2(equation: str) -> str:
 	parts = equation.split()
+	i = 1
+	while (l := len(parts)) > 1:
+		if i >= l:
+			i = 1
+		if parts[i] == "+":
+			parts[i-1] = str(eval(parts[i-1] + parts.pop(i) + parts.pop(i))) # pop the same index twice
+		elif parts[i] == "*" and "+" not in parts:
+			parts[i-1] = str(eval(parts[i-1] + parts.pop(i) + parts.pop(i))) # pop the same index twice
+		else:
+			i += 2
+	return parts[0]
 
 
-
-# print(f"{operations_ooo('3 * 4 + 2 + 7 + (4 * (9 + 9 + 2 + 3 * 8) + 9 + (6 + 4) + 7) + 3')}")
-# print(f"{operations_ooo('9 + 9 + 2 + 3 * 8')}")
-# print(f"{operations_ooo('(7 + 2 + (2 * 3)) * ((8 + 3 * 4 + 3 + 9 + 4) + 5) + 8 * 7 + 5 * 5')}")
+print(f"{operations_ooo('2 * 3 + (4 * 5)', True)}") # p2 should be: 46
+print(f"{operations_ooo('9 + 9 + (2 + 3 * 8)', True)}") # p2 should be: 58
+print(f"{operations_ooo('5 + (8 * 3 + 9 + 3 * 4 * 3)', True)}") # p2 should be: 1445
 
 if __name__ == "__main__":
 	import os, timeit
@@ -58,5 +65,5 @@ if __name__ == "__main__":
 		DATA = f.read().strip()
 	DATA = DATA.split("\n")
 	print(f"Part one: {sum(int(operations_ooo(EQ)) for EQ in DATA)}")
-	# print(f"Part two: {}")
-	# print(f"Time: {timeit.timeit('', setup='from __main__ import ', number = 1)}")
+	print(f"Part two: {sum(int(operations_ooo(EQ, True)) for EQ in DATA)}") # not 5783053342291, too low
+	print(f"Time: {timeit.timeit('sum(int(operations_ooo(EQ, True)) for EQ in DATA)', setup='from __main__ import operations_ooo, DATA', number = 1)}") # 0.02
