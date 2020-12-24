@@ -4,6 +4,8 @@ from typing import Dict, List
 # then convert them all to regex expressions
 class Rule:
 	def __init__(self, inp: str): # 109: 128 16 | 90 68 # '128: "b"'
+		self.id, rule = inp.split(": ")
+		self.group1, self.group2 = rule.split(" | ")
 		pattern = r"(\d+): \"?(\w+)\"? ?(\d{0,3})( \| (\d+) (\d{0,3}))?"
 		match = re.match(pattern, inp)
 		if match:
