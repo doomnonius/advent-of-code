@@ -87,7 +87,8 @@ class Board:
 				if rotation_a % 4 == 0:
 					a.flip()
 		# print(self.potentials)
-		# I can 
+		# I can't visualize how to solve this one
+		
 		
 
 monster_pattern = """                  # 
