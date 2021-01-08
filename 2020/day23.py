@@ -1,5 +1,3 @@
-import datetime
-
 def move_cups(order, moves):
 	l = len(order)+1
 	while moves > 0:
@@ -26,13 +24,10 @@ def many_cups(order, moves):
 	currCup = l-2
 	while moves > 0:
 		# print(len(order))
-		if moves % 1000 == 0:
-			print(f"Moves: {moves}; Time: {datetime.datetime.now()}; {moves/100000}% remaining")
+		if moves % 10000 == 0:
+			print(f"Moves: {moves}; {moves/100000}% remaining")
 			order = order[currCup+1:] + order[0:currCup+1]
 			currCup = l-2
-		# while currCup + 4 >= l-1:
-		# 	order = order[currCup:] + order[0:currCup]
-		# 	currCup = 0
 		removed = [order.pop(currCup - 1), order.pop(currCup - 2), order.pop(currCup - 3)]
 		insert_at = (order[currCup-3] - 1) % l # list is now shorter, so active is now at c-3
 		while insert_at in removed or insert_at == 0:
