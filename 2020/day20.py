@@ -1,39 +1,48 @@
 import math, itertools
-from typing import List
+from typing import List, Tuple, Set
+
+import numpy as np
+
+CAM_PRINT = {
+	True: "#",
+	False: ".",
+}
+
+np.set_printoptions(linewidth=500, formatter={"bool": lambda x: CAM_PRINT[x]})
+
 
 class Image:
 	def __init__(self, data):
 		self.lines = data.split("\n")
 		self.id = int(self.lines[0].split(" ")[1][0:4])
-		self.top = self.lines[1]
-		self.top_count = self.top.count("#")
-		self.bottom = self.lines[10]
-		self.bottom_count = self.bottom.count("#")
-		self.left = "".join([x[0] for x in self.lines[1:11]])
-		self.left_count = self.left.count("#")
-		self.right = "".join([x[9] for x in self.lines[1:11]])
-		self.right_count = self.right.count("#")
-		self.data = []
+		lit_pixels = [[c == "#" for c in line] for y, line in enumerate(self.lines[1:])]
+		self.full_pixels = np.array(lit_pixels, dtype=np.bool)
+		print(self.full_pixels)
+		self.define_edges()
+		self.edge_hashes = {self.left, self.right, self.top, self.bottom, self.left[::-1], self.right[::-1], self.top[::-1], self.bottom[::-1]}
+		assert len(self.edge_hashes) == 8, "Edge hashes should have 8 members."
 		self.orientation = {"rotations":0, "flipped": False}
+		self.right_n = None
+		self.left_n = None
+		self.down_n = None
+		self.up_n = None
+		self._lock = False
+	
+	def define_edges(self):
+		self.top = tuple(self.full_pixels[0])
+		self.bottom = tuple(self.full_pixels[9])
+		self.left = tuple(([x[0] for x in self.full_pixels[0:10]]))
+		self.right = tuple(([x[9] for x in self.lines[0:10]]))
 
-	def rotate_edges(self, turns=1):
-		while turns > 0:
-			save, save_count = self.top, self.top_count
-			self.top, self.top_count = self.right, self.right_count
-			self.right, self.right_count = self.bottom[::-1], self.bottom_count
-			self.bottom, self.bottom_count = self.left, self.left_count
-			self.left, self.left_count = save[::-1], save_count
-			turns -= 1
-			self.orientation["rotations"] = (self.orientation["rotations"] + 1) % 4
-		return(self)
+	def _rotate_90(self):
+		if not self._lock:
+			self.full_pixels = np.rot90(self.full_pixels)
+		self.define_edges()
 
-	def flip(self):
-		self.top = self.top[::-1]
-		self.right = self.right[::-1]
-		self.bottom = self.bottom[::-1]
-		self.left = self.left[::-1]
-		self.orientation["flipped"] = not self.orientation["flipped"]
-		return self
+	def _flip_vertical(self):
+		if not self._lock:
+			self.full_pixels = np.flipud(self.full_pixels)
+		self.define_edges()
 
 	def __repr__(self):
 		# return f"Top: {self.top}\nBottom: {self.bottom}\nLeft: {self.left}\nRight: {self.right}"
@@ -50,15 +59,40 @@ class Board:
 	def __init__(self, images: List, size: int):
 		self.images = images
 		self.size = size
-		self.outline = []
-		dim_1 = dim_2 = 0
-		while dim_1 < size:
-			self.outline.append([])
-			while dim_2 < size:
-				self.outline[dim_1].append([])
-				dim_2 += 1
-			dim_2 = 0
-			dim_1 += 1
+
+	def right(self, image: Image) -> Image:
+		pot_n = self.potentials[image.id]
+		assert len(pot_n) <= 2, "Length should be 2 or less"
+		for i in pot_n:
+			for img in self.images:
+				if img.id == i:
+					i_img = img
+					break
+			while rot_a < 8:
+				while rot_b < 8:
+					if image.right == i_img.left:
+						image._lock = True
+						i_img._lock = True
+						break
+					i_img._rotate_90()
+					rot_b += 1
+					if rot_b % 4 == 0:
+						i_img._flip_vertical()
+				image._rotate_90()
+				rot_a += 1
+				if rot_a % 4 == 0:
+					image._flip_vertical
+		return i
+
+	def down(self, image: Image) -> Image:
+		pot_n = self.potentials[image.id]
+		assert len(pot_n) == 1, "Length should be 1"
+		for i in self.potentials[image.id]:
+			pass
+		return i
+	
+	def rotate_board(self):
+		pass
 
 	def assemble(self):
 		"""
@@ -67,57 +101,67 @@ class Board:
 		"""
 		self.potentials = {}
 		for a, b in itertools.permutations(self.images, 2):
-			rotation_a = 0
-			while rotation_a < 8:
-				rotation_b = 0
-				while rotation_b < 8:
-					if a.right_count == b.left_count:
-						if a.right == b.left:
-							if a.id not in self.potentials.keys():
-								self.potentials[a.id] = []
-							# potentials[a.id].append(((a.orientation["rotations"], a.orientation["flipped"]), b.id, (b.orientation["rotations"], b.orientation["flipped"])))
-							if b.id not in self.potentials[a.id]:
-								self.potentials[a.id].append(b.id)
-					b.rotate_edges()
-					rotation_b += 1
-					if rotation_b % 4 == 0:
-						b.flip()
-				a.rotate_edges()
-				rotation_a += 1
-				if rotation_a % 4 == 0:
-					a.flip()
-		# print(self.potentials)
+			for edge in a.edge_hashes:
+				if edge in b.edge_hashes:
+					if a.id not in self.potentials.keys():
+						self.potentials[a.id] = []
+					if b.id not in self.potentials[a.id]:
+						self.potentials[a.id].append(b.id)
+					if b.id not in self.potentials.keys():
+						self.potentials[b.id] = []
+					if a.id not in self.potentials[b.id]:
+						self.potentials[b.id].append(a.id)
 		# I can't visualize how to solve this one atm
 		# From Peter's solution:
 		# 	- use np, it has good built-ins
 		#	- only worry about moving right and down
 		#	- I have a lot of the pieces already, just need to put them together properly
+		for k in self.potentials.keys():
+			for i in self.images:
+				if i.id == k:
+					k_image = i
+					break
+			row = 0
+			column = 0
+			if len(self.potentials[k]) == 2:
+				while column < self.size:
+					first_image_in_row = k_image
+					while row < self.size:
+						k_image.right_n = self.right(k_image)
+						k_image.right_n.left_n = k_image
+						k_image = k_image.right_n
+						row += 1
+					row = 0
+					k_image = first_image_in_row
+					k_image.down_n = self.down(k_image)
+					k_image.down_n.up_n = k_image
+					k_image = k_image.down_n
+					column += 1
 
-		
-		
-
-monster_pattern = """                  # 
+	def find_monsters(self):
+		MONSTER = """                  # 
 #    ##    ##    ###
  #  #  #  #  #  #   """
+		print(MONSTER)
+
 		
-print(monster_pattern)
+		
+
+# test result should be 273
 
 if __name__ == "__main__":
 	import os, timeit
 	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-	with open(os.path.join(FILE_DIR, "day20.input")) as f:
+	with open(os.path.join(FILE_DIR, "day20.testinput")) as f:
 		DATA = f.read().strip()
 	IMAGES = [Image(x) for x in DATA.split("\n\n")]
 	SQUARE_SIZE = int(math.sqrt(len(IMAGES)))
 	BOARD = Board(IMAGES, SQUARE_SIZE)
-	# print(IMAGES[0])
-	# IMAGES[0].rotate_edges() # this is working
-	# print(IMAGES[0])
 	BOARD.assemble()
-	print(BOARD.outline)
 	ans = [x.id for x in IMAGES if len(BOARD.potentials[x.id]) == 2]
 	print(ans)
 	print(f"Part one: {math.prod(ans)}")
 	print(BOARD.potentials)
-	# print(f"Part two: {}")
+	BOARD.find_monsters()
+	# print(f"Part two: {}") 
 	# print(f"Time: {timeit.timeit('', setup='from __main__ import ', number = 1)}")
