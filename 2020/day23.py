@@ -51,6 +51,6 @@ if __name__ == "__main__":
 	TEST_DATA = [int(x) for x in list(TEST_DATA)]
 	print(f"Part one: {move_cups(DATA, 100)}")
 	x = [1, 3, 4, 2, 5] + list(range(5, 100001))
-	print(f"Time: {timeit.timeit('x[0:2] + x[3:5] + [x[2]] + x[5:]', setup='from __main__ import x', number = 1000)}")
-	print(f"Time: {timeit.timeit('z = [x.pop(4), x.pop(3)]; [x.insert(2, y) for y in z]', setup='from __main__ import x', number = 1000)}")
+	# print(f"Time: {timeit.timeit('x[0:2] + x[3:5] + [x[2]] + x[5:]', setup='from __main__ import x', number = 1000)}")
+	# print(f"Time: {timeit.timeit('z = [x.pop(4), x.pop(3)]; [x.insert(2, y) for y in z]', setup='from __main__ import x', number = 1000)}")
 	print(f"Part two: {many_cups(TEST_DATA, 10000000)}")
