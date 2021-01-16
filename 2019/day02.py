@@ -4,6 +4,7 @@ class Computer:
 	def __init__(self, codes: List, index = 0):
 		self.codes = codes
 		self.index = index
+		self.input_data = None
 	
 	def __repr__(self):
 		return str(self.codes)
@@ -58,6 +59,8 @@ class Computer:
 		return self
 
 	def input(self):
+		if type(self.input_data) == int:
+			return self.input_data
 		while True:
 			try:
 				retVal = int(input("Input: "))

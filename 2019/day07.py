@@ -1,51 +1,30 @@
-from day5 import computer
-from copy import deepcopy
-from itertools import permutations
+from day02 import Computer
+import itertools
 
-inp = [3,8,1001,8,10,8,105,1,0,0,21,38,47,64,89,110,191,272,353,434,99999,3,9,101,4,9,9,102,3,9,9,101,5,9,9,4,9,99,3,9,1002,9,5,9,4,9,99,3,9,101,2,9,9,102,5,9,9,1001,9,5,9,4,9,99,3,9,1001,9,5,9,102,4,9,9,1001,9,5,9,1002,9,2,9,1001,9,3,9,4,9,99,3,9,102,2,9,9,101,4,9,9,1002,9,4,9,1001,9,4,9,4,9,99,3,9,101,1,9,9,4,9,3,9,101,1,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,101,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,101,2,9,9,4,9,99,3,9,101,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,101,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,101,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,101,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,102,2,9,9,4,9,99,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,1001,9,1,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,101,1,9,9,4,9,99,3,9,102,2,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,1001,9,1,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,1001,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,1002,9,2,9,4,9,99,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1002,9,2,9,4,9,3,9,1002,9,2,9,4,9,3,9,1002,9,2,9,4,9,99]
-# inp = [3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,
-# -5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,
-# 53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10]
+TEST_DATA = """3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0"""
 
-def thrust(L, poss):
-    """ Iterates through a possibility.
-    """
-    z, i0, i1, i2, i3, i4, x4, a = 0, 0, 0, 0, 0, 0, 0, True
-    while x4 != 99:
-        # print("first")
-        if a: x0 = deepcopy(L)
-        else: poss = [None, None, None, None, None]
-        z, x0, i0 = computer(x0, I1 = poss[0], I2 = z, i = i0)
-        # O = computer(x)
-        print(z, L, i0)
-        print("second")
-        if a: x1 = deepcopy(L)
-        z, x1, i1 = computer(x1, I1 = poss[1], I2 = z, i = i1)
-        # O = computer(x)
-        print("third")
-        if a: x2 = deepcopy(L)
-        z, x2, i2 = computer(x2, I1 = poss[2], I2 = z, i = i2)
-        # O = computer(x)
-        print("fourth")
-        if a: x3 = deepcopy(L)
-        z, x3, i3 = computer(x3, I1 = poss[3], I2 = z, i = i3)
-        # O = computer(x)
-        print("fifth")
-        if a: x4, a = deepcopy(L), False
-        z, x4, i4 = computer(x4, I1 = poss[4], I2 = z, i = i4)
-        # return computer(x)
-    print("Done!")
-    return z
+def calc_max_thrust(data):
+	m = 0
+	for var in itertools.permutations([0,1,2,3,4], 5):
+		n = out = 0
+		for num in var:
+			run = Computer(data.copy()).noun(out) # this shouldn't actually be a noun, but an input -> change how input works
+			run.input_data = num
+			print(run)
+			out = run.run_codes()
+			n += out
+			print("Ding!")
+		if n > m:
+			m = n
+	return m
 
-def iterations(L):
-    """ Goes through all iterations.
-    """
-    phase_list = list(permutations(range(5,10), 5))
-    thrusts = []
-    for x in phase_list:
-        thrusts.append(thrust(inp, x))
-    print(thrusts)
-    return max(thrusts)
-    
-# print(thrust(inp, phases))
-print(iterations(inp))
+if __name__ == "__main__":
+	import os, timeit
+	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+	with open(os.path.join(FILE_DIR, "day07.input")) as f:
+		DATA = f.read().strip()
+	DATA = [int(x) for x in DATA.split(",")]
+	TEST_DATA = [int(x) for x in TEST_DATA.split(",")]
+	print(f"Part one: {calc_max_thrust(TEST_DATA.copy())}")
+	# print(f"Part two: {}")
+	# print(f"Time: {timeit.timeit('', setup='from __main__ import ', number = 1)}")
