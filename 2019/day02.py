@@ -1,10 +1,11 @@
 from typing import List
 
 class Computer:
-	def __init__(self, codes: List, index = 0):
+	def __init__(self, codes: List, index = 0, inp = []):
 		self.codes = codes
 		self.index = index
-		self.input_data = None
+		self.input_list = inp
+		self.done = False
 	
 	def __repr__(self):
 		return str(self.codes)
@@ -29,7 +30,7 @@ class Computer:
 		self.index += 2
 
 	def code5(self, p1, p2):
-		if self.codes[self.parameter(p1, self.index+1)]: # beccause anything not 0 = true in python
+		if self.codes[self.parameter(p1, self.index+1)]: # because anything not 0 = true in python
 			self.index = self.codes[self.parameter(p2, self.index+2)]
 		else:
 			self.index += 3
@@ -59,19 +60,14 @@ class Computer:
 		return self
 
 	def input(self):
-		if type(self.input_data) == int:
-			return self.input_data
-		while True:
-			try:
-				retVal = int(input("Input: "))
-				break
-			except:
-				print("Please input a number.")
-		return retVal
+		if self.input_list:
+			return self.input_list.pop(0)
+		else:
+			raise IndexError
 
 	def output(self, data):
 		self.out = data
-		print(data)
+		# print(data)
 
 	def parameter(self, p, index):
 		if p == 0:
@@ -91,9 +87,9 @@ class Computer:
 		self.codes[2] = n
 		return self
 
-	def run_codes(self, index_return = 0):
+	def run_codes(self, index_return = 0, at_index = 0):
 		while True:
-			# print(f"{comp}, i: {i}")
+			# print(f"i: {self.index}")
 			initial_opcode = self.codes[self.index]
 			opcode = initial_opcode%100
 			p1 = initial_opcode//100%10
@@ -107,6 +103,7 @@ class Computer:
 				self.code3(p1)
 			if opcode == 4:
 				self.code4(p1)
+				return self.out
 			if opcode == 5:
 				self.code5(p1, p2)
 			if opcode == 6:
@@ -116,6 +113,7 @@ class Computer:
 			if opcode == 8:
 				self.code8(p1, p2, p3)
 			if opcode == 99:
+				self.done = True
 				try: return self.out
 				except: return self.codes[index_return]
 
