@@ -6,6 +6,7 @@ class Computer:
 		self.index = index
 		self.input_list = inp
 		self.done = False
+		self.relative = 0
 	
 	def __repr__(self):
 		return str(self.codes)
@@ -59,6 +60,11 @@ class Computer:
 		self.index += 4
 		return self
 
+	def code9(self, p1):
+		self.relative += self.codes[self.parameter(p1, self.index+1)]
+		self.index += 2
+		return self
+
 	def input(self):
 		if self.input_list:
 			return self.input_list.pop(0)
@@ -71,9 +77,14 @@ class Computer:
 
 	def parameter(self, p, index):
 		if p == 0:
-			return self.codes[index]
+			retVal = self.codes[index]
 		elif p == 1:
-			return index
+			retVal = index
+		elif p == 2:
+			retVal = self.relative + self.codes[index]
+		if retVal+1 > len(self.codes):
+			self.codes += [0] * (retVal-len(self.codes)+1)
+		return retVal
 
 	def replace(self, index: int, new_num: int):
 		self.codes[index] = new_num
@@ -112,6 +123,8 @@ class Computer:
 				self.code7(p1, p2, p3)
 			if opcode == 8:
 				self.code8(p1, p2, p3)
+			if opcode == 9:
+				self.code9(p1)
 			if opcode == 99:
 				self.done = True
 				try: return self.out
