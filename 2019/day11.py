@@ -68,7 +68,7 @@ def paint(inst: List[int]):
 	max_x = max(z.x for z in robot.white)
 	max_y = max(z.y for z in robot.white)
 	h = max_y - min_y + 1
-	w = max_x - min_x + 3
+	w = max_x - min_x + 1
 	reg = []
 	while h > 0:
 		row = []
@@ -79,10 +79,10 @@ def paint(inst: List[int]):
 		h -= 1
 		w = max_x - min_x + 3
 	for coord in robot.white:
-		x = coord.x + abs(min_x)
+		x = coord.x + abs(min_x) - 2
 		y = coord.y + abs(min_y)
-		print(f"x: {x}, len(reg[0]): {len(reg[0])}, y: {y}, len(reg): {len(reg)}")
 		reg[y][x] = "X"
+	reg = reg[::-1]
 	for row in reg:
 		for char in row:
 			print(char, end='')
@@ -98,5 +98,5 @@ if __name__ == "__main__":
 	DATA = [int(x) for x in DATA.split(",")]
 	robot = Robot(DATA)
 	print(f"Part one: {count_paint(robot)}") # not 249, too low
-	print(f"Part two: {paint(DATA)}") # not EPALUFAH; returns the answer upside down (but not backwards)
-	# print(f"Time: {timeit.timeit('', setup='from __main__ import ', number = 1)}")
+	print(f"Part two: {paint(DATA)}") # not EPALUFAH; returned the answer upside down (but not backwards) - now fixed
+	print(f"Time: {timeit.timeit('paint(DATA)', setup='from __main__ import paint, DATA', number = 1)}")
