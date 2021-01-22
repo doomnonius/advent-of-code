@@ -74,6 +74,7 @@ class Computer:
 	def output(self, data):
 		self.out = data
 		# print(data)
+		return self
 
 	def parameter(self, p, index):
 		if p == 0:
