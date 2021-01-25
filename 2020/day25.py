@@ -14,7 +14,6 @@ def yield_transform(value, subject):
 		value %= 20201227
 
 def find_match(k1, k2, value, subject):
-	x = 0
 	keys = {k1, k2}
 	loops = {k1: 0, k2: 0}
 	# print(f"keys: {keys}")
