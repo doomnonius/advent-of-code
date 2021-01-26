@@ -20,43 +20,12 @@ class Arcade (Computer):
 
 
 	def input(self):
-		# self.draw()
 		if self.ball.loc.x > self.paddle.x:
 			return 1
 		elif self.ball.loc.x < self.paddle.x:
 			return -1
 		else:
 			return 0
-
-	def draw(self):
-		all_pieces = self.wall.copy(); all_pieces.update(self.block); all_pieces.add(self.paddle); all_pieces.add(self.ball.loc)
-		max_x = max(z.x for z in all_pieces)
-		max_y = max(z.y for z in all_pieces)
-		self.screen = []
-		while max_y >= 0:
-			row = []
-			self.screen.append(row)
-			hold = max_x
-			while max_x >= 0:
-				row.append(" ")
-				max_x -= 1
-			max_y -= 1
-			max_x = hold
-		for z in self.wall:
-			self.screen[z.y][z.x] = "|"
-		for z in self.block:
-			self.screen[z.y][z.x] = "X"
-		for z in {self.paddle}:
-			self.screen[z.y][z.x] = "="
-		for z in {self.ball.loc}:
-			self.screen[z.y][z.x] = "o"
-		for z in {self.ball.prev}:
-			if self.ball.prev != self.ball.loc:
-				self.screen[z.y][z.x] = "."
-		for row in self.screen:
-			for char in row:
-				print(char, end='')
-			print()
 
 def run_game(info: List[int]):
 	game = Arcade(info)
