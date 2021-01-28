@@ -36,16 +36,10 @@ def reverse_hash(recipes: Dict, prod: str) -> int:
 	req, leftovers = build_full_list(recipes, prod, {}, {})
 	o_count = 1000000000000 - req['ORE']
 	f_count = 0
-	# for recipe in recipes:
-	# 	x = build_full_list(recipes, recipe.product, {}, {}, {})
-	# 	x[2].pop(recipe.product, None)
-	# 	builds[recipe.product] = [x[2], x[0]["ORE"]]
 	while o_count > 0:
 		new_req, leftovers = build_full_list(recipes, prod, {}, leftovers)
 		f_count += 1
 		o_count -= new_req['ORE']
-		# if r[1]:
-		# 	f_count += 1
 		if f_count % 1000 == 0:
 			print(f"f_count: {f_count}, {datetime.datetime.now()}")
 	return f_count
@@ -90,9 +84,8 @@ if __name__ == "__main__":
 	TEST_DATA2 = TEST_DATA2.split("\n")
 	TEST_RECIPES1 = {Recipe(x).product:Recipe(x) for x in TEST_DATA1}
 	TEST_RECIPES2 = {Recipe(x).product:Recipe(x) for x in TEST_DATA2}
-	# print(TEST_RECIPES)
 	print(f"Test one: {build_full_list(TEST_RECIPES2, 'FUEL', {}, {})[0]['ORE']}")
 	print(f"Part one: {build_full_list(RECIPES, 'FUEL', {}, {})[0]['ORE']}")
 	# print(f"Test two: {reverse_hash(TEST_RECIPES2, 'FUEL')}")
 	print(f"Part two: {reverse_hash(RECIPES, 'FUEL')}")
-	print(f"Time: {timeit.timeit('build_full_list(RECIPES, z, {}, {})', setup='from __main__ import build_full_list, RECIPES, z', number = 1000)}")
+	# print(f"Time: {timeit.timeit('build_full_list(RECIPES, z, {}, {})', setup='from __main__ import build_full_list, RECIPES, z', number = 1000)}")

@@ -17,6 +17,9 @@ class Coord (NamedTuple):
 	def __repr__(self):
 		return "(" + str(self.x) + ", " + str(self.y) + ")"
 
+	def neighbors(self):
+		return [self + Coord(0, 1), self + Coord(0, -1), self + Coord(1, 0), self + Coord(-1, 0)]
+
 	def reduce(self, max):
 		x = self.x
 		y = self.y
