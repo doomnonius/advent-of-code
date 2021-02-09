@@ -11,40 +11,40 @@ class Computer:
 	def __repr__(self):
 		return str(self.codes)
 
-	def code1(self, p1, p2, p3):
+	def code1(self, p1, p2, p3): # addition
 		self.codes[self.parameter(p3, self.index + 3)] = self.codes[self.parameter(p1, self.index + 1)] + self.codes[self.parameter(p2, self.index + 2)]
 		self.index += 4
 		return self
 
-	def code2(self, p1, p2, p3):
+	def code2(self, p1, p2, p3): # multiplication
 		self.codes[self.parameter(p3, self.index + 3)] = self.codes[self.parameter(p1, self.index + 1)] * self.codes[self.parameter(p2, self.index + 2)]
 		self.index += 4
 		return self
 
-	def code3(self, p1):
+	def code3(self, p1): # input
 		self.codes[self.parameter(p1, self.index + 1)] = self.input()
 		self.index += 2
 		return self
 
-	def code4(self, p1):
+	def code4(self, p1): # output
 		self.output(self.codes[self.parameter(p1, self.index + 1)])
 		self.index += 2
 
-	def code5(self, p1, p2):
+	def code5(self, p1, p2): # jump-if-true
 		if self.codes[self.parameter(p1, self.index+1)]: # because anything not 0 = true in python
 			self.index = self.codes[self.parameter(p2, self.index+2)]
 		else:
 			self.index += 3
 		return self
 
-	def code6(self, p1, p2):
+	def code6(self, p1, p2): # jump-if-false
 		if not self.codes[self.parameter(p1, self.index+1)]: # because 0 = false in python
 			self.index = self.codes[self.parameter(p2, self.index+2)]
 		else:
 			self.index += 3
 		return self
 
-	def code7(self, p1, p2, p3):
+	def code7(self, p1, p2, p3): # less than
 		if self.codes[self.parameter(p1, self.index+1)] < self.codes[self.parameter(p2, self.index+2)]:
 			self.codes[self.parameter(p3, self.index+3)] = 1
 		else:
@@ -52,7 +52,7 @@ class Computer:
 		self.index += 4
 		return self
 
-	def code8(self, p1, p2, p3):
+	def code8(self, p1, p2, p3): # more than
 		if self.codes[self.parameter(p1, self.index+1)] == self.codes[self.parameter(p2, self.index+2)]:
 			self.codes[self.parameter(p3, self.index+3)] = 1
 		else:
@@ -60,7 +60,7 @@ class Computer:
 		self.index += 4
 		return self
 
-	def code9(self, p1):
+	def code9(self, p1): # adjust relative base
 		self.relative += self.codes[self.parameter(p1, self.index+1)]
 		self.index += 2
 		return self
@@ -76,12 +76,12 @@ class Computer:
 		# print(data)
 		return self
 
-	def parameter(self, p, index):
+	def parameter(self, p, index): # handles parameterization
 		if p == 0:
 			retVal = self.codes[index]
 		elif p == 1:
 			retVal = index
-		elif p == 2:
+		else:
 			retVal = self.relative + self.codes[index]
 		if retVal+1 > len(self.codes):
 			self.codes += [0] * (retVal-len(self.codes)+1)
@@ -141,10 +141,8 @@ def test_codes(codes):
 			if comp.run_codes() == 19690720:
 				return 100 * x + y
 			y += 1
-			# print(f"x: {x}, y: {y}")
 		x += 1
 		y = 0
-		# print(f"x: {x}, y: {y}")
 
 
 
