@@ -10,9 +10,9 @@ class Ascii (Computer):
 		self.y = 0
 		self.inp_c = 0
 		self.main_routine = ["A", ",", "B", ",", "B", ",", "A", ",", "C", ",", "B", ",", "C", ",", "C", ",", "B", ",", "A", "\n"]
-		self.move_a = ["R", ",", "10",  ",", "R", ",", "8", ",", "L", ",", "5", ",", "5", ",", "L", ",", "5", ",", "5", "\n"]
+		self.move_a = ["R", ",", "10",  ",", "R", ",", "8", ",", "L", ",", "10", ",", "L", ",", "10", "\n"]
 		self.move_b = ["R", ",", "8", ",", "L", ",", "6", ",", "L", ",", "6", "\n"]
-		self.move_c = ["L", ",", "5", ",", "5", ",", "R", ",", "5", ",", "5", ",", "L", ",", "6", "\n"]
+		self.move_c = ["L", ",", "10", ",", "R", ",", "10", ",", "L", ",", "6", "\n"]
 		self.y_n = ["n", "\n"]
 		self.routines = [self.main_routine, self.move_a, self.move_b, self.move_c, self.y_n]
 		self.next_routine = []
