@@ -20,7 +20,24 @@ def shuffle(instructions: List, size: int, repeat = 0) -> List:
 			deck = deck[cut:] + deck[:cut]
 	return deck
 
-
+def part2(inst: List[str], cards: int, repeats: int, target: int) -> int:
+	# part 2 logic stolen from Peter
+	offset = 0
+	increment = 1
+	for instruction in inst:
+		instruction = instruction.split()
+		if instruction[1] == "into":
+			increment *= -1
+			offset += increment
+		elif instruction[1] == "with":
+			inc_diff = int(instruction[3])
+			increment *= pow(inc_diff, cards - 2, cards)
+		else:
+			cut = int(instruction[1])
+			offset += increment * cut
+	offset *= pow(1 - increment, cards-2, cards)
+	increment = pow(increment, repeats, cards)
+	return (target * increment + (1 - increment) * offset) % cards
 
 if __name__ == "__main__":
 	import os, timeit
@@ -29,5 +46,5 @@ if __name__ == "__main__":
 		DATA = f.read().strip()
 	DATA = DATA.split("\n")
 	print(f"Part one: {shuffle(DATA, 10007).index(2019)}")
-	print(f"Part two: {shuffle(DATA, 119315717514047)[2020]}")
+	print(f"Part two: {part2(DATA, 119315717514047, 101741582076661, 2020)}")
 	# print(f"Time: {timeit.timeit('', setup='from __main__ import ', number = 1)}")
