@@ -5,7 +5,6 @@ void Main()
 	int serial = 6548;
 	List<FuelCell> grid = calcCells(serial);
 	Console.WriteLine($"Part one: {part1(grid)}");
-	Console.WriteLine($"Part two: {calcBestCharge(90, 269, 18, 300, 300)}");
 	Console.WriteLine($"Part two: {part2(serial, 300, 300)}"); // This one needs a lot of optimizing. 233,250,12 but it took 13:53 to find --> down to 3:16
 }
 
