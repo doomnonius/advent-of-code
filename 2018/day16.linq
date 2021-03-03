@@ -63,6 +63,7 @@ public int part2(List<List<int>> program, Dictionary<int, List<string>> poss)
 			}
 		}
 	}
+	matches.OrderBy(x => x.Key).Dump();
 	List<int> registers = new List<int> {0, 0, 0, 0};
 	foreach (List<int> command in program)
 	{
