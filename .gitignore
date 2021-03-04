@@ -2,3 +2,4 @@
 /venv
 .vscode
 *.lnk
+*.testinput

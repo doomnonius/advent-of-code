@@ -14,7 +14,7 @@ void Main()
 	}
 	//commands.Dump();
 	Console.WriteLine($"Part one: {part1(ogdata[0].Trim(), commands)}");
-	Console.WriteLine($"Part two: {part2(ogdata[0].Trim(), commands)}"); // super cheated off of Peter here, turns out this is trying to find the sum of the factors of a large number, so I just did that in python command line
+	Console.WriteLine($"Part two: {part2(ogdata[0].Trim(), commands)}"); // super cheated off of Peter here, turns out this is trying to find the sum of the factors of a large number, so I just did that in python command line - in other words, this line probably gives the right answer but doesn't get there quickly
 }
 
 // You can define other methods, fields, classes and namespaces here
