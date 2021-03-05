@@ -2,18 +2,18 @@
 
 void Main()
 {
-	string filePath = @"C:\projects\python\advent-of-code\2018\day20.testinput";
+	string filePath = @"C:\projects\python\advent-of-code\2018\day20.input";
 	string ogdata = File.ReadAllText(filePath).Trim();
 	ogdata.Length.Dump();
 	Console.WriteLine($"Part one: {part1(ogdata.ToCharArray().Skip(1).Take(ogdata.Length-2).ToArray()).Item1}"); // not 1503, too low
-	Console.WriteLine($"Part two: {part2(ogdata.ToCharArray().Skip(1).Take(ogdata.Length-2).ToArray())}"); // not 10057, too high; 9031 also too high; 8109 too low; nor 84??; 
+	Console.WriteLine($"Part two: {part2b(ogdata.ToCharArray().Skip(1).Take(ogdata.Length-2).ToArray())}"); // not 10057, too high; 9031 also too high; 8109 too low; nor 84??; not 8201; 
 }
 
 // You can define other methods, fields, classes and namespaces here
 public int part2(char[] input)
 {
 	int retVal = 0;
-	for (int i = 0; i < input.Length; i++) // nothing less than a thousand characters could possibly be 1000 doors away... I thought
+	for (int i = 1000; i < input.Length; i++) // nothing less than a thousand characters could possibly be 1000 doors away... I thought
 	{
 		if (input[i] == ')' || input[i] == '(' || input[i] == '|') continue;
 		char[] sub = input.Take(i+1).ToArray();
@@ -24,7 +24,7 @@ public int part2(char[] input)
 		int r = part1b(sub, out ret).Item1;
 		try
 		{
-			if (ret.Last().Dump() >= 5)
+			if (ret.Last()/*.Dump()*/ >= 1000)
 			{
 				retVal++;
 			}
@@ -44,7 +44,7 @@ public int part2b(char[] input)
 		{
 			retVal++;
 		}
-		else if (i == -1) retVal--;
+		else if (i == -1) retVal -= 1;
 	}
 	return retVal;
 }
@@ -97,13 +97,20 @@ public (int, int) part1b(char[] input, out List<int> overK, int lastOpen = 0, in
 		{
 			lastOpen = retVal + lastOpen;
 			(int n, int j) = part1b(input.Skip(i + 1).Take(input.Length - (i + 1)).ToArray(), out overK, lastOpen);
-			retVal = n + lastOpen;
+			retVal = n;
 			i += j + 1; // + 1 here because each ')' needs to close once for each '|' and each '(' before it, and when it closes for '(' it needs to move one, but not when it closes for a '|'
 		}
 		else if (c == '|')
 		{
 			(int n, int j) = part1b(input.Skip(i + 1).Take(input.Length - (i + 1)).ToArray(), out overK, lastOpen);
-			alts.Add(lastOpen + retVal);
+			if (input[i + 1] != ')')
+			{
+				alts.Add(n);
+			}
+			else
+			{
+				alts.Add(0);
+			}
 			i += j;
 		}
 		else if (c == ')')
