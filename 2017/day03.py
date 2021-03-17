@@ -12,6 +12,9 @@ class Coord:
 	def full_neighbors(self):
 		return [self + Coord(0, 1), self + Coord(0, -1), self + Coord(1, 0), self + Coord(-1, 0), self + Coord(1, 1), self + Coord(1, -1), self + Coord(-1, -1), self + Coord(-1, 1)]
 
+	def __eq__(self, other):
+		return self.x == other.x and self.y == other.y
+
 
 def manhattan(point: Coord) -> int:
 	""" Takes a list of cross points and calculates the taxicab distance for each.
