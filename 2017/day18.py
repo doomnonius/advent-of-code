@@ -90,7 +90,6 @@ def part2(inp: List[str]) -> int:
 					index0 += line[2]
 					continue
 			index0 += 1
-			# print(f"0: {registers0}\n1: {registers1}")
 		while 0 <= index1 < l:
 			line = inp[index1].split()
 			if not isNumber(line[1]) and line[1] not in registers1.keys(): registers1[line[1]] = 0
@@ -126,9 +125,7 @@ def part2(inp: List[str]) -> int:
 					index1 += line[2]
 					continue
 			index1 += 1
-			# print(f"0: {registers0}\n1: {registers1}")
 	return retVal
-
 
 
 if __name__ == "__main__":
