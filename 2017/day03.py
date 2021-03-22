@@ -12,6 +12,9 @@ class Coord:
 	def full_neighbors(self):
 		return [self + Coord(0, 1), self + Coord(0, -1), self + Coord(1, 0), self + Coord(-1, 0), self + Coord(1, 1), self + Coord(1, -1), self + Coord(-1, -1), self + Coord(-1, 1)]
 
+	def neighbors(self):
+		return [self + Coord(0, 1), self + Coord(0, -1), self + Coord(1, 0), self + Coord(-1, 0)]
+
 	def __eq__(self, other):
 		return self.x == other.x and self.y == other.y
 
