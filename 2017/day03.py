@@ -18,6 +18,9 @@ class Coord:
 	def __eq__(self, other):
 		return self.x == other.x and self.y == other.y
 
+	def __hash__(self):
+		return hash((self.x, self.y))
+
 
 def manhattan(point: Coord) -> int:
 	""" Takes a list of cross points and calculates the taxicab distance for each.
