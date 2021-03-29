@@ -4,6 +4,6 @@ if __name__ == "__main__":
 	with open(os.path.join(FILE_DIR, "day\\.input")) as f:
 		DATA = f.read().strip()
 	DATA = DATA.split("\n")
-	print(f"Part one: {DATA}")
+	print(f"Part one: {part1(DATA)}")
 	# print(f"Part two: {}")
 	# print(f"Time: {timeit.timeit('', setup='from __main__ import ', number = 1)}")
