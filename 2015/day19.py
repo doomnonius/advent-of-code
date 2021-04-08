@@ -16,10 +16,22 @@ def part1(replacements: Dict[str, Replace], compound: str) -> int:
 		atom = compound[i]
 		if i < l - 1 and compound[i+1].islower():
 			atom += compound[i+1]
-		for o in replacements[atom]
+		la = len(atom)
+		if atom in replacements:
+			for o in replacements[atom].out:
+				retVal.add(compound[:i] + o + compound[i+la:])
+		i += la
+	return len(retVal)
 
 
-		i += len(atom)
+def part2(rev_replace: Dict[str, str], compound: str, retVal = 0) -> int:
+	while compound:
+		for molecule in rev_replace:
+			if (c := compound.count(molecule)):
+				retVal += c
+				compound = compound.replace(molecule, rev_replace[molecule])
+				compound = compound.replace('e', '')
+	return retVal
 
 
 
@@ -33,15 +45,14 @@ def parse(inp: List[str]) -> Dict[str, Replace]:
 	return replacements
 
 
-
-
 if __name__ == "__main__":
 	import os, timeit
 	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 	with open(os.path.join(FILE_DIR, "day19.input")) as f:
 		DATA = f.read().strip()
-	DATA1, DATA2 = DATA.split("\n\n")
-	DATA1 = parse(DATA1.split("\n"))
-	print(f"Part one: {part1(DATA1, DATA2)}")
-	# print(f"Part two: {}")
+	REPLACE, TARGET = DATA.split("\n\n")
+	REPLACE = parse(REPLACE.split("\n"))
+	print(f"Part one: {part1(REPLACE, TARGET)}")
+	REVERSE_REPLACE = {x:y for y in REPLACE.keys() for x in REPLACE[y].out}
+	print(f"Part two: {part2(REVERSE_REPLACE, TARGET)}") # got it first try, pretty sure very lucky and not necessarily replicable with other inputs
 	# print(f"Time: {timeit.timeit('', setup='from __main__ import ', number = 1)}")
