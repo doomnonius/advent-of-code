@@ -1,10 +1,6 @@
 *.pyc
 /venv
-<<<<<<< HEAD
-.vscode/settings.json
-=======
 .vscode
 *.lnk
 *.testinput
 2018/*.py
->>>>>>> 9669bf119c411466e1d40f56ea3351d7be8f4953
