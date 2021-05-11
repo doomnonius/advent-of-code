@@ -1,10 +1,102 @@
-from day5 import computer
+from day02 import Computer
+from typing import List, Set, NamedTuple
 
-inp = [3,8,1005,8,351,1106,0,11,0,0,0,104,1,104,0,3,8,102,-1,8,10,1001,10,1,10,4,10,108,1,8,10,4,10,102,1,8,28,3,8,1002,8,-1,10,101,1,10,10,4,10,1008,8,0,10,4,10,1002,8,1,51,1006,0,85,2,1109,8,10,3,8,1002,8,-1,10,101,1,10,10,4,10,1008,8,0,10,4,10,102,1,8,80,1,2,2,10,1,1007,19,10,1,1001,13,10,3,8,1002,8,-1,10,1001,10,1,10,4,10,108,1,8,10,4,10,1001,8,0,113,1,2,1,10,1,1109,17,10,1,108,20,10,2,1005,3,10,3,8,102,-1,8,10,1001,10,1,10,4,10,108,1,8,10,4,10,1002,8,1,151,2,5,19,10,1,104,19,10,1,109,3,10,1006,0,78,3,8,102,-1,8,10,1001,10,1,10,4,10,1008,8,0,10,4,10,1002,8,1,189,1006,0,3,2,1004,1,10,3,8,1002,8,-1,10,101,1,10,10,4,10,1008,8,1,10,4,10,1001,8,0,218,1,1008,6,10,1,104,8,10,1006,0,13,3,8,1002,8,-1,10,101,1,10,10,4,10,1008,8,0,10,4,10,102,1,8,251,1006,0,17,1006,0,34,1006,0,24,1006,0,4,3,8,102,-1,8,10,1001,10,1,10,4,10,1008,8,0,10,4,10,102,1,8,285,1006,0,25,2,1103,11,10,1006,0,75,3,8,1002,8,-1,10,1001,10,1,10,4,10,108,1,8,10,4,10,101,0,8,316,2,1002,6,10,1006,0,30,2,106,11,10,1006,0,21,101,1,9,9,1007,9,1072,10,1005,10,15,99,109,673,104,0,104,1,21101,0,937151009684,1,21101,0,368,0,1105,1,472,21102,386979963796,1,1,21102,379,1,0,1106,0,472,3,10,104,0,104,1,3,10,104,0,104,0,3,10,104,0,104,1,3,10,104,0,104,1,3,10,104,0,104,0,3,10,104,0,104,1,21101,179410325723,0,1,21101,426,0,0,1106,0,472,21101,0,179355823195,1,21102,437,1,0,1106,0,472,3,10,104,0,104,0,3,10,104,0,104,0,21101,0,825460785920,1,21101,460,0,0,1105,1,472,21102,1,838429614848,1,21102,1,471,0,1105,1,472,99,109,2,21202,-1,1,1,21102,40,1,2,21102,1,503,3,21101,493,0,0,1105,1,536,109,-2,2106,0,0,0,1,0,0,1,109,2,3,10,204,-1,1001,498,499,514,4,0,1001,498,1,498,108,4,498,10,1006,10,530,1101,0,0,498,109,-2,2106,0,0,0,109,4,2101,0,-1,535,1207,-3,0,10,1006,10,553,21101,0,0,-3,21202,-3,1,1,22101,0,-2,2,21101,0,1,3,21101,572,0,0,1105,1,577,109,-4,2105,1,0,109,5,1207,-3,1,10,1006,10,600,2207,-4,-2,10,1006,10,600,21202,-4,1,-4,1106,0,668,21202,-4,1,1,21201,-3,-1,2,21202,-2,2,3,21102,619,1,0,1105,1,577,22102,1,1,-4,21101,0,1,-1,2207,-4,-2,10,1006,10,638,21101,0,0,-1,22202,-2,-1,-2,2107,0,-3,10,1006,10,660,22101,0,-1,1,21101,660,0,0,106,0,535,21202,-2,-1,-2,22201,-4,-2,-4,109,-5,2105,1,0]
+class Coord (NamedTuple):
+	x: int
+	y: int
 
-# intcode painting robot
-# needed result: number of unique spaces that get painted at least once
-# change opcode 3 to check color of current panel
-# create x and y coordinates
+	def __add__(self, other):
+		return Coord(self.x + other.x, self.y + other.y)
 
-print(computer(inp, paint = True))
+class Robot (Computer):
+	def __init__(self, instructions):
+		super().__init__(instructions)
+		self.white = set()
+		self.painted = set()
+		self.location = Coord(0, 0)
+		self.o = 0
+		self.o_list = [Coord(0, 1), Coord(1, 0), Coord(0, -1), Coord(-1, 0)]
+
+	def output(self, data):
+		self.out = data
+		# print("Hello")
+		return self
+
+	def move(self, dir: int) -> Coord:
+		if dir == 0:
+			self.o = (self.o+3)%4
+		elif dir == 1:
+			self.o = (self.o+1)%4
+		else:
+			print("move() received faulty direction data")
+		self.location = self.location + self.o_list[self.o]
+
+	def input(self) -> int:
+		if self.location in self.white:
+			return 1
+		else:
+			return 0
+		
+
+def count_paint(robot: Robot):
+	status = robot.run_codes()
+	o = 0
+	while not robot.done:
+		if status == 0 and o % 2 == 0:
+			o += 1
+			if robot.location in robot.white:
+				robot.white.remove(robot.location)
+			robot.painted.add(robot.location)
+		elif status == 1 and o % 2 == 0:
+			o += 1
+			robot.white.add(robot.location)
+			robot.painted.add(robot.location)
+		elif o % 2 == 1:
+			robot.move(status)
+			o += 1
+		else:
+			print("we shouldn't be here")
+		status = robot.run_codes()
+	return len(robot.painted)
+
+def paint(inst: List[int]):
+	robot = Robot(DATA)
+	robot.white = {Coord(0, 0)}
+	count_paint(robot)
+	min_x = min(z.x for z in robot.white)
+	min_y = min(z.y for z in robot.white)
+	max_x = max(z.x for z in robot.white)
+	max_y = max(z.y for z in robot.white)
+	h = max_y - min_y + 1
+	w = max_x - min_x + 1
+	reg = []
+	while h > 0:
+		row = []
+		reg.append(row)
+		while w > 0:
+			row.append(" ")
+			w -= 1
+		h -= 1
+		w = max_x - min_x + 3
+	for coord in robot.white:
+		x = coord.x + abs(min_x) - 2
+		y = coord.y + abs(min_y)
+		reg[y][x] = "X"
+	reg = reg[::-1]
+	for row in reg:
+		for char in row:
+			print(char, end='')
+		print()
+	
+
+
+if __name__ == "__main__":
+	import os, timeit
+	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+	with open(os.path.join(FILE_DIR, "day11.input")) as f:
+		DATA = f.read().strip()
+	DATA = [int(x) for x in DATA.split(",")]
+	robot = Robot(DATA)
+	print(f"Part one: {count_paint(robot)}") # not 249, too low
+	print(f"Part two: {paint(DATA)}") # not EPALUFAH; returned the answer upside down (but not backwards) - now fixed
+	print(f"Time: {timeit.timeit('paint(DATA)', setup='from __main__ import paint, DATA', number = 1)}")

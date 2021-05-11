@@ -8,6 +8,9 @@ if __name__ == "__main__":
 	with open(os.path.join(FILE_DIR, "day05.input")) as f:
 		DATA = f.read().strip()
 	DATA = [int(x) for x in DATA.split(",")]
-	print(f"Part one: {Computer(DATA.copy()).run_codes()}")
-	print(f"Part two: {Computer(DATA).run_codes()}") # not 9234535, too high; 
+	p1 = Computer(DATA.copy(), inp=[1])
+	while p1.run_codes() == 0:
+		p1.run_codes()
+	print(f"Part one: {p1.out}")
+	print(f"Part two: {Computer(DATA, inp=[5]).run_codes()}") # not 9234535, too high; 
 	# print(f"Time: {timeit.timeit('', setup='from __main__ import ', number = 1)}")

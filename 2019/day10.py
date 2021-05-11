@@ -1,133 +1,155 @@
 from itertools import permutations
-# inp = ".#..#.....#####....#...##"
-# h = 5
-inp = "#.#.###.#.#....#..##.#.........#..#..#..#.#..#.....#.##.##.##.##.##..#...#...##.#...#.#####...###.#.#.#..#####.###.#.#.####.#####.#.#.#.##.#.##...####.#.##.##....###..#.#..#..#..###...##....#.#...##.#.#...####.....#.#######..##.##.#..#.###.#..###.#.#..##.....###.#.#.##.#......#####..###..##.#.##..###.##.###..###..#.###...#.#...#..#.##.#.#..#.#....###.#.#..##.#.##.##.#####..###...#.###.###...##..#..##.##.#.##..####.#.###.###.....####.##..#######....#.##....###.#..#..##.#.####.....###..##.#.#..#..#...#.####..######..#####.##...#.#....#....#.#.#####.##.#.#####..##.#...#..##..##.#.##.##.####..##.##..####..#..####.########.#..#.##.#.######....##...#.##.##.####......#.##.##"
-h = 26
-w = 26
+from typing import List, Set, NamedTuple, Tuple
 
-def common(L):
-    """ Finds if two numbers have a common factor. Returns True if they do not.
-    """
-    n = 0
+class Coord (NamedTuple):
+	x: int
+	y: int
+	
+	def __eq__(self, other):
+		if self.x == other.x and self.y == other.y:
+			return True
+		else:
+			return False
 
-    for i in range(2, min(L)+1):
-        if L[0]%i==L[1]%i==0:
-            n += 1
-    
-    if n > 0:
-        return False
-    else:
-        return True
+	def __add__(self, other):
+		return Coord(self.x + other.x, self.y + other.y)
 
-a = list(filter(lambda x: (x[0] == 1 or (x[0]<x[1] and common(x))) or (x[1] == 1 or (x[1]<x[0] and common(x))), list(permutations(range(1,h), 2)))) #permutations returns a list of lists
-a.append((1,1))
-# print(a)
+	def __repr__(self):
+		return "(" + str(self.x) + ", " + str(self.y) + ")"
 
-def count(S, h):
-    """Takes a string of asteroid belt data and finds the spot that can see the most asteroids, and how many asteroids it can see.
-    """
-    
-    def math_part(point, quadrant, c, z = 0):
-        """ Takes a point and a quadrant and figures things out for that quadrant.
-        Quadrants are: RU, RD, LD, LU
-        """
+	def neighbors(self):
+		return [self + Coord(0, 1), self + Coord(0, -1), self + Coord(1, 0), self + Coord(-1, 0)]
 
-        if quadrant[1] == "U":
-            m = -1
-        else: m = 1
+	def reduce(self, max):
+		x = self.x
+		y = self.y
+		while max > 1:
+			if x % max == 0 and y % max == 0:
+				x //= max
+				y //= max
+			max -= 1
+		return Coord(x, y)
 
-        if quadrant[0] == "L":
-            n = -1
-        else: n = 1
-        
-        y1, x1 = point[0], point[1]
 
-        # print([y, x])
-        # print(z)
-        # print(a)
-        i, j = a[z][0], a[z][1]
-        # print(i, ",", j)
-        # print(quadrant)
-        while True:
-            if 0 <= x1 + j*n < w and 0 <= y1 + m*i < h:
-                # print(x1+j*n<w)
-                # print([quadrant, c, y1+i*m, x1+j*n])
-                if complete[y1 + (m*i)][x1 + (j*n)] == "#":
-                    c += 1
-                    if c == 200: answer = (x1 + (j*n))*100 + y1 + (m*i)
-                    elif c < 200: answer = 0
-                    if z < len(a)-1: z += 1
-                    else: break
-                    i, j = a[z][0], a[z][1]
-                    # print(i, ",", j)
-                else:
-                    i += a[z][0]
-                    j += a[z][1]
-            else:
-                if z < len(a)-1: z += 1
-                else: break
-                i, j = a[z][0], a[z][1]
-                # print(i, ",", j)
-        # a.pop(0)
-        return(c, answer)
-    
-    # first I need to split the string into the rows
-    total = len(S)
-    # print(total)
-    w = total/h
-    # print(w)
-    complete = []
-    x = 0
-    pointer = 0
-    while x < h:
-        # print(complete, x)
-        complete.append([])
-        while pointer < w:
-            complete[x].append(S[0])
-            S = S[1:]
-            # print(S)
-            pointer += 1
-        pointer = 0
-        x += 1
-    # print(complete)
-    # x, y, c = 0, 0, 0
-    c = 0
-    # results = []
+def count_asteroids(point: Coord, field: Set[Coord], size: Tuple, angles: List[Coord]) -> int:
+	hits = []
+	for angle in angles:
+		vec = angle + point
+		while 0 <= vec[0] < max(size) and 0 <= vec[1] < max(size):
+			if vec in field:
+				hits.append(vec)
+				break
+			else:
+				vec = vec + angle
+	return len(hits), point
+	
+def key():
+	return lambda z: z.y/z.x
+	
+def list_angles(size: Tuple):
+	rng = range(-max(size)+1, max(size))
+	angles = [Coord(0, -1)] + remove_dupes(sorted([Coord(x, y) for x, y in permutations(rng, 2) if x > 0 and y < 0], key = key())) + [Coord(1, 0)] + remove_dupes(sorted([Coord(x, y) for x, y in permutations(rng, 2) if x > 0 and y > 0] + [Coord(1, 1)], key = key())) + [Coord(0, 1)] + remove_dupes(sorted([Coord(x, y) for x, y in permutations(rng, 2) if x < 0 and y > 0], key = key())) + [Coord(-1, 0)] + remove_dupes(sorted([Coord(x, y) for x, y in permutations(rng, 2) if x < 0 and y < 0] + [Coord(-1, -1)], key = key()))
+	
+	return(angles)
 
-    # the point is known
+def remove_dupes(l: List[Coord]):
+	i = 0
+	red = False
+	while True:
+		for c in l[i+1:]:
+			if l[i].y/l[i].x == c.y/c.x:
+				l.remove(c)
+				red = True
+			if red:
+				l[i] = l[i].reduce(max([abs(z.x) for z in l] + [abs(z.y) for z in l]))
+				red = False
+		if i + 1 < len(l): i += 1
+		else: break
+	return l
 
-    # while y < h:
-    #     while x < w:
-    #         if complete[y][x] == "#":
-    a.sort(key = lambda x: x[0]/x[1], reverse=True)
-    a.insert(0, (1,0))
-    # print(a)
-    c, answer = math_part((17,13), "RU", c)
-    a.pop(0)
+def check_points(rows: List[List[int]], size: Tuple) -> int:
+	m = (0, 0)
+	angles = list_angles(size)
+	asteroids = convert_to_set(rows)
+	for ast in asteroids:
+		count = count_asteroids(ast, asteroids, size, angles)
+		if count[0] > m[0]:
+			m = count
+	return m
 
-    a.sort(key = lambda x: x[0]/x[1])
-    a.insert(0, (0,1))
-    c, answer = math_part((17,13), "RD", c)
-    a.pop(0)
-    
-    a.sort(key = lambda x: x[0]/x[1], reverse=True)
-    a.insert(0, (1,0)) #sorted so that 1,0 is first
-    c, answer = math_part((17,13), "LD", c)
-    a.pop(0)
+def convert_to_set(rows: List[List[int]]):
+	y = x = 0
+	asteroids = set()
+	for row in rows:
+		for point in row:
+			if point == 1:
+				asteroids.add(Coord(x, y))
+			x += 1
+		y += 1
+		x = 0
+	return asteroids
 
-    a.sort(key = lambda x: x[0]/x[1])
-    a.insert(0, (0,1)) # sorted so 0,1 is first
-    c, answer = math_part((17,13), "LU", c)
-                # add count to results table
-        #         results.append(c)
-        #         if c == 269:
-        #             print("Point:", y, ",", x)
-        #         c = 0
-        #     x += 1 # this increments the check for clear spaces
-        # x = 0
-        # y += 1
-    
-    # results.sort(key=lambda x: x[1])
-    return c, answer
+def find_200(point: Coord, field: Set[Coord], size: Tuple):
+	angles = list_angles(size)
+	destroyed = 0
+	retVal = 0
+	last_field = 1000
+	while True:
+		i = 0
+		while i < len(angles):
+			check = point + angles[i]
+			while 0 <= abs(check.x) <= max(size) and 0 <= abs(check.y) <= max(size):
+				if check in field:
+					field.remove(check)
+					destroyed += 1
+					if destroyed == 200:
+						retVal = check.x*100 + check.y
+					break
+				else:
+					check = check + angles[i]
+			i += 1
+		if len(field) < 50:
+			last_field = len(field)
+		if len(field) == last_field:
+			return retVal
 
-print(count(inp, h))
+
+TEST_DATA = """.#..##.###...#######
+##.############..##.
+.#.######.########.#
+.###.#######.####.#.
+#####.##.#.##.###.##
+..#####..#.#########
+####################
+#.####....###.#.#.##
+##.#################
+#####.##.###..####..
+..######..##.#######
+####.##.####...##..#
+.#####..#.######.###
+##...#.##########...
+#.##########.#######
+.####.#.###.###.#.##
+....##.##.###..#####
+.#.#.###########.###
+#.#.#.#####.####.###
+###.##.####.##.#..##"""
+
+if __name__ == "__main__":
+	import os, timeit
+	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+	with open(os.path.join(FILE_DIR, "day10.input")) as f:
+		DATA = f.read().strip()
+	FIELD = [[1 if char == "#" else 0 for char in row] for row in DATA.split("\n")]
+	# TEST_FIELD = [[1 if char == "#" else 0 for char in row ] for row in TEST_DATA.split("\n")]
+	SIZE = (len(FIELD[0]), len(FIELD))
+	# TEST_SIZE = (len(TEST_FIELD[0]), len(TEST_FIELD))
+	# t_count, t_point = check_points(TEST_FIELD, TEST_SIZE)
+	# print(f"Part one: {t_count}")
+	# print(t_point)
+	count, point = check_points(FIELD, SIZE)
+	print(f"Part one: {count}") # not 281, too low
+	print(f"Time: {timeit.timeit('check_points(FIELD, SIZE)', setup='from __main__ import check_points, FIELD, SIZE', number = 1)}")
+	# print(f"Part two: {find_200(t_point, convert_to_set(TEST_FIELD), TEST_SIZE)}")
+	print(f"Part two: {find_200(point, convert_to_set(FIELD), SIZE)}") # not 703, too high; 
+	print(f"Time: {timeit.timeit('find_200(point, convert_to_set(FIELD), SIZE)', setup='from __main__ import find_200, point, convert_to_set, FIELD, SIZE', number = 1)}")
