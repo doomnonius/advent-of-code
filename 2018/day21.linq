@@ -20,10 +20,12 @@ void Main()
 public KeyValuePair<int, int> part1(string ipData, Dictionary<int, (string, List<int>)> program)
 {
 	Dictionary<int, int> retVal = new Dictionary<int, int> ();
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < 100; i++)
 	{
-		//Console.WriteLine($"Running with {i} in index 0.");
-		retVal.Add(i, runCode(ipData, program, i));
+		//$"Running with {i} in index 0.".Dump();
+		int r = runCode(ipData, program, i);
+		$"Returned {r}".Dump();
+		retVal.Add(i, r);
 	}
 	return retVal.Where(x => x.Value == retVal.Min(y => y.Value)).ToList()[0];
 }
@@ -31,10 +33,11 @@ public KeyValuePair<int, int> part1(string ipData, Dictionary<int, (string, List
 
 public int runCode(string ipData, Dictionary<int, (string, List<int>)> program, int reg1)
 {
+	//reg1.Dump();
 	int ip = 0;
 	int runs = 0;
-	int ipIndex = Int32.Parse(ipData.Substring(ipData.LastIndexOf(' ') + 1)); ;
-	Dictionary<string, Func<List<int>, List<int>, List<int>>> opcodes = new Dictionary<string, Func<List<int>, List<int>, List<int>>>
+	int ipIndex = Int32.Parse(ipData.Substring(ipData.LastIndexOf(' ') + 1));
+	Dictionary<string, Func<List<int>, List<long>, List<long>>> opcodes = new Dictionary<string, Func<List<int>, List<long>, List<long>>>
 	{
 		{"addr", addr},
 		{"addi", addi},
@@ -53,128 +56,136 @@ public int runCode(string ipData, Dictionary<int, (string, List<int>)> program, 
 		{"eqri", eqri},
 		{"eqrr", eqrr}
 	};
-	List<int> registers = new List<int> { reg1, 0, 0, 0, 0, 0 };
-	while (ip < program.Count && runs < 10000000)
+	List<long> registers = new List<long> { reg1, 0, 0, 0, 0, 0 };
+	while (ip < program.Count)
 	{
 		List<int> command = program[ip].Item2;
 		registers[ipIndex] = ip;
+		//registers.Dump();
 		registers = opcodes[program[ip].Item1](command, registers);
-		ip = registers[ipIndex];
+		ip = Convert.ToInt32(registers[ipIndex]);
 		//ip.Dump();
 		ip++;
 		runs++;
+		//runs.Dump();
 	}
 	return runs;
 }
 
-public List<int> addi(List<int> commands, List<int> before)
+public List<long> addi(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);  //quick 'n' easy deep copy
+	List<long> result = before.ConvertAll(x => x);  //quick 'n' easy deep copy
 	result[commands[2]] = before[commands[0]] + commands[1];
 	return result;
 }
 
-public List<int> mulr(List<int> commands, List<int> before)
+public List<long> mulr(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = before[commands[0]] * before[commands[1]];
 	return result;
 }
 
-public List<int> muli(List<int> commands, List<int> before)
+public List<long> muli(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
+	//$"{commands[1]} * {before[commands[0]]}".Dump();
+	//$"{commands[1] * before[commands[0]]}".Dump();
 	result[commands[2]] = before[commands[0]] * commands[1];
 	return result;
 }
 
-public List<int> banr(List<int> commands, List<int> before)
+public List<long> banr(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = before[commands[0]] & before[commands[1]];
 	return result;
 }
 
-public List<int> bani(List<int> commands, List<int> before)
+public List<long> bani(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
+	//result.Dump();
 	result[commands[2]] = before[commands[0]] & commands[1];
+	//result.Dump();
 	return result;
 }
 
-public List<int> borr(List<int> commands, List<int> before)
+public List<long> borr(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = before[commands[0]] | before[commands[1]];
 	return result;
 }
 
-public List<int> bori(List<int> commands, List<int> before)
+public List<long> bori(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
-	result[commands[2]] = before[commands[0]] | commands[1];
+	List<long> result = before.ConvertAll(x => x);
+	result[commands[2]] = before[commands[0]] | Convert.ToInt64(commands[1]);
 	return result;
 }
 
-public List<int> setr(List<int> commands, List<int> before)
+public List<long> setr(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = before[commands[0]];
 	return result;
 }
 
-public List<int> seti(List<int> commands, List<int> before)
+public List<long> seti(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = commands[0];
 	return result;
 }
 
-public List<int> gtir(List<int> commands, List<int> before)
+public List<long> gtir(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = commands[0] > before[commands[1]] ? 1 : 0;
 	return result;
 }
 
-public List<int> gtri(List<int> commands, List<int> before)
+public List<long> gtri(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = before[commands[0]] > commands[1] ? 1 : 0;
 	return result;
 }
 
-public List<int> gtrr(List<int> commands, List<int> before)
+public List<long> gtrr(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = before[commands[0]] > before[commands[1]] ? 1 : 0;
 	return result;
 }
 
-public List<int> eqir(List<int> commands, List<int> before)
+public List<long> eqir(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = commands[0] == before[commands[1]] ? 1 : 0;
 	return result;
 }
 
-public List<int> eqri(List<int> commands, List<int> before)
+public List<long> eqri(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = before[commands[0]] == commands[1] ? 1 : 0;
 	return result;
 }
 
-public List<int> eqrr(List<int> commands, List<int> before)
+public List<long> eqrr(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
 	result[commands[2]] = before[commands[0]] == before[commands[1]] ? 1 : 0;
 	return result;
 }
 
-public List<int> addr(List<int> commands, List<int> before)
+public List<long> addr(List<int> commands, List<long> before)
 {
-	List<int> result = before.ConvertAll(x => x);
+	List<long> result = before.ConvertAll(x => x);
+	//$"{before[commands[0]]} + {before[commands[1]]}".Dump();
+	//$"{before[commands[0]] + before[commands[1]]}".Dump();
 	result[commands[2]] = before[commands[0]] + before[commands[1]];
 	return result;
 }
