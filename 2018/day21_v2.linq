@@ -2,50 +2,66 @@
 
 void Main()
 {
-	//List<long> regs = new List<long> {1, 0, 0, 0, 0, 0};
+	//for (long i = 10626258; i <= 12361563; i++)
+	//{
+		//List<long> regs = new List<long> {1, 0, 0, 0, 0, 0};
+	List<long> seen = new List<long> ();
+	bool p1 = true;
+	bool broken = false;
 	long r5 = 0;
-	long r4 = -1;
-	long r3 = 0;
+	long r4 = 0;
 	long r2 = 0;
 	long r1 = 0;
-	long r0 = 2000000000;
 	bool skipped = true;
-	while (r4 != r0)
+	while (true)
 	{
-		r4.Dump();
-		r1.Dump();
-		if (skipped)
+		if (r4 > 0)
 		{
-			r4 = 0;
-			r1 = r4 | 65536;
-			r4 = 678134;
-		}
-		skipped = true;
-		r5 = r1 & 255;
-		r4 = r4 + r5;
-		r4 = r4 & 16777215;
-		r4 = r4 * 65899;
-		r4 = r4 & 16777215;
-		while (r1 > 255)
-		{
-			//r1.Dump();
-			r5 = 0;
-			r2 = 256;
-			//r2 = r5 + 1;
-			//r2 = r2 * 256;
-			while (r2 < r1)
+			if (p1)
 			{
-				r5++;
-				r2 += 256;
-				//r2 = r5 + 1;
-				//r2 = r2 * 256;
+				Console.WriteLine($"Part one: {r4}");
+				p1 = false;
 			}
-			r1 = r5;
-			skipped = false;
-			break;
+			if (seen.Contains(r4))
+			{
+				Console.WriteLine($"Part two: {seen.Last()}");
+				return;
+			}
+			else
+			{
+				seen.Add(r4);
+			}
+		}
+		//r4.Dump();
+		//seen.Dump();
+		//r0.Dump();
+		r1 = r4 | 65536;
+		r4 = 678134;
+		while (true)
+		{
+			r5 = r1 & 255;
+			r4 = r4 + r5;
+			r4 = r4 & 16777215;
+			r4 = r4 * 65899;
+			r4 = r4 & 16777215;
+			if (256 > r1)
+			{
+				break;
+			}
+			r5 = 0;
+			while (true)
+			{
+				r2 = r5 + 1;
+				r2 *= 256;
+				if (r2 > r1)
+				{
+					r1 = r5;
+					break;
+				}
+				r5++;
+			}
 		}
 	}
-	"Finished!".Dump();
 }
 
 // You can define other methods, fields, classes and namespaces here

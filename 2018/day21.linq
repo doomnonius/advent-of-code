@@ -12,28 +12,32 @@ void Main()
 		commands.Add(ind, (splitLine[0], splitLine[1].Split(' ').ToList().ConvertAll(x => Int32.Parse(x))));
 		ind++;
 	}
-	Console.WriteLine($"Part one: {part1(ogdata[0].Trim(), commands)}"); //not 10
+	part1(ogdata[0].Trim(), commands);
 	//Console.WriteLine($"Part two: {part2(ogdata[0].Trim(), commands)}");
 }
 
 // You can define other methods, fields, classes and namespaces here
-public KeyValuePair<int, int> part1(string ipData, Dictionary<int, (string, List<int>)> program)
+public void part1(string ipData, Dictionary<int, (string, List<int>)> program)
 {
 	Dictionary<int, int> retVal = new Dictionary<int, int> ();
-	for (int i = 0; i < 100; i++)
-	{
-		//$"Running with {i} in index 0.".Dump();
-		int r = runCode(ipData, program, i);
-		$"Returned {r}".Dump();
-		retVal.Add(i, r);
-	}
-	return retVal.Where(x => x.Value == retVal.Min(y => y.Value)).ToList()[0];
+	//for (int i = 10626258; i <= 12361563; i++)
+	//{
+	//	//$"Running with {i} in index 0.".Dump();
+	runCode(ipData, program, 0);
+	//	if (r > 0)
+	//	{
+	//		$"Returned {r}".Dump();
+	//		retVal.Add(i, r);
+	//	}
+	//}
+	//return retVal.Where(x => x.Value == retVal.Min(y => y.Value)).ToList()[0];
 }
 
 
-public int runCode(string ipData, Dictionary<int, (string, List<int>)> program, int reg1)
+public long runCode(string ipData, Dictionary<int, (string, List<int>)> program, int reg1)
 {
 	//reg1.Dump();
+	bool p1 = true;
 	int ip = 0;
 	int runs = 0;
 	int ipIndex = Int32.Parse(ipData.Substring(ipData.LastIndexOf(' ') + 1));
@@ -57,6 +61,7 @@ public int runCode(string ipData, Dictionary<int, (string, List<int>)> program, 
 		{"eqrr", eqrr}
 	};
 	List<long> registers = new List<long> { reg1, 0, 0, 0, 0, 0 };
+	List<long> options = new List<long> ();
 	while (ip < program.Count)
 	{
 		List<int> command = program[ip].Item2;
@@ -65,11 +70,43 @@ public int runCode(string ipData, Dictionary<int, (string, List<int>)> program, 
 		registers = opcodes[program[ip].Item1](command, registers);
 		ip = Convert.ToInt32(registers[ipIndex]);
 		//ip.Dump();
+		if (ip == 12)
+		{
+			registers.Dump();
+			break;
+		}
 		ip++;
+		//program[ip].Item1.Dump();
 		runs++;
+		if (program[ip].Item1 == "eqrr")
+		{
+			if (p1)
+			{
+				Console.WriteLine($"Part one: {registers[4]}");
+				registers.Dump();
+				p1 = false;
+			}
+			if (options.Contains(registers[4]))
+			{
+				Console.WriteLine($"Part two: {options.Last()}");
+				return 0;
+			}
+			else
+			{
+				options.Add(registers[4]);
+			}
+		}
 		//runs.Dump();
 	}
-	return runs;
+	return 0;
+	//if (limiter < 49)
+	//{
+	//	return runs;
+	//}
+	//else
+	//{
+	//	return 0;
+	//}
 }
 
 public List<long> addi(List<int> commands, List<long> before)
@@ -177,6 +214,7 @@ public List<long> eqri(List<int> commands, List<long> before)
 public List<long> eqrr(List<int> commands, List<long> before)
 {
 	List<long> result = before.ConvertAll(x => x);
+	//$"{before[commands[0]]}".Dump();
 	result[commands[2]] = before[commands[0]] == before[commands[1]] ? 1 : 0;
 	return result;
 }
