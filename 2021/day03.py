@@ -53,7 +53,6 @@ def co2(inp: List[str], l) -> int:
             if int(item[spin]) != check:
                 newInp.append(item)
         inp = newInp
-        print(inp)
         if len(inp) == 1:
             return int(inp[0], 2)
 
