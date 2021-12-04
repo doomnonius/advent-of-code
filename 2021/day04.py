@@ -15,12 +15,10 @@ def row_complete(board: List[int]) -> bool:
 	for row in range(5):
 		low = row * 5
 		if sum(board[low:low+5]) == -5:
-			print(f"Row: {row}")
 			return True
 	# columns
 	for column in range(5):
 		if sum(board[column::5]) == -5:
-			print(f"Column: {column}")
 			return True
 	return False
 
@@ -43,10 +41,15 @@ def part2(picks: List[int], boards: List[List[int]]) -> int:
 
 if __name__ == "__main__":
 	import os, timeit
+	test = False
 	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 	file = os.path.splitext(__file__)[0][-5:]
-	with open(os.path.join(FILE_DIR, file + ".input")) as f:
-		DATA = f.read().strip()
+	if test:
+		with open(os.path.join(FILE_DIR, file + ".testinput")) as f:
+			DATA = f.read().strip()
+	else:
+		with open(os.path.join(FILE_DIR, file + ".input")) as f:
+			DATA = f.read().strip()
 	DATA = DATA.split("\n\n")
 	PICKS = [int(x) for x in DATA[0].split(',')]
 	BOARDS = DATA[1:]
