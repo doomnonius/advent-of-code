@@ -26,6 +26,18 @@ class Coord (NamedTuple):
 			return self
 		else:
 			return other
+	
+	def right(self, other):
+		if self.x < other.x:
+			return other
+		else:
+			return self
+
+	def deeper(self, other):
+		if self.y > other.y:
+			return self
+		else:
+			return other
 
 
 def part1(inp: List[Coord], test: bool, diag: bool = False) -> int:
@@ -41,17 +53,34 @@ def part1(inp: List[Coord], test: bool, diag: bool = False) -> int:
 				# note for continuation: I need to know the direction of the diagonal
 				# find which has lower x, then choose to go up or down
 				leftmost = c1.left(c2)
-				l = leftmost.x
+				rightmost = c1.right(c2)
+				deepest = c1.deeper(c2)
+				x = leftmost.x
 				y = leftmost.y
-				maxx = max(c1.x, c2.x)
-				for c in range(maxx - minx + 1):
-					new_c = Coord(l + c, miny + c)
-					if test: print(new_c)
-					if new_c not in coords:
-						coords.add(new_c)
-					else:
-						doubled.add(new_c)
-			continue
+				new_c = Coord(x,y)
+				if test: print(new_c)
+				if leftmost == deepest: # then we are climbing up and right (decreasing y, increasing x)
+					done = False
+					while not done:
+						if new_c not in coords:
+							coords.add(new_c)
+						else:
+							doubled.add(new_c)
+						if new_c == rightmost:
+							done = True
+						new_c = Coord(new_c.x+1, new_c.y-1)
+						if test: print(new_c)
+				else: # then we are climbing down and right (increasing y, increasing x)
+					done = False
+					while not done:
+						if new_c not in coords:
+							coords.add(new_c)
+						else:
+							doubled.add(new_c)
+						if new_c == rightmost:
+							done = True
+						new_c = Coord(new_c.x+1, new_c.y+1)
+						if test: print(new_c)
 		else:
 			if dire == "v":
 				maxy = max(c1.y, c2.y)
@@ -84,7 +113,7 @@ def part1(inp: List[Coord], test: bool, diag: bool = False) -> int:
 
 if __name__ == "__main__":
 	import os, timeit
-	test = True
+	test = False
 	FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 	file = os.path.splitext(__file__)[0][-5:]
 	if test:
@@ -96,4 +125,4 @@ if __name__ == "__main__":
 	DATA = [Coord(int(x[0]), int(x[1])) for x in [y.split(",") for y in DATA.replace(" -> ", '\n').split("\n")]]
 	if test: print(DATA)
 	print(f"Part 1: {part1(DATA, test)}")
-	print(f"Part 2: {part1(DATA, test, True)}")
+	print(f"Part 2: {part1(DATA, test, True)}") # wrong: 23512
