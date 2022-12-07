@@ -23,10 +23,9 @@ def part1(commands: List[str], p1: bool = True) -> int:
 
 if __name__ == "__main__":
     import os, timeit
-    FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-    file = os.path.splitext(__file__)[0][-5:]
-    with open(os.path.join(FILE_DIR, file + ".input")) as f:
-        DATA = f.read().strip()
+    from pathlib import Path
+    INPUT_FILE = Path(__file__).with_suffix(".input")
+    DATA = INPUT_FILE.read_text().strip()
     DATA = DATA.split('\n')
     print(f"Part 1: {part1(DATA)}") # not 1074121
     print(f"Part 2: {part1(DATA, False)}")
