@@ -1,6 +1,6 @@
 from typing import List
 
-def part1(nums: List[int], p2: bool = False) -> int:
+def part1(nums: List[str], p2: bool = False) -> int:
     retVal = len(nums[0]) * 2 + (len(nums)-2) * 2
     y = 1
     if p2: highScore = 0
