@@ -5,7 +5,7 @@ def neighbors(t: Tuple):
     return [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
 
 def part1(nums: Dict[Tuple[int,int], int]) -> int:
-    retVal = 0
+    lows = []
     bad = False
     for pt in nums.keys():
         for n in neighbors(pt):
@@ -17,12 +17,13 @@ def part1(nums: Dict[Tuple[int,int], int]) -> int:
                 if test: print(f"key error") # nothing
         if not bad:
             if test: print(f"pt: {pt} adding: {nums[pt] + 1}")
-            retVal += nums[pt] + 1
+            lows.append(pt)
         bad = False
-    return retVal
+    return lows
 
 def part2(nums: Dict[Tuple[int,int], int]) -> int:
-    return
+    lows = part1(nums)
+    # find each neighbor that isn't nine, then each neighbor of that that isn't nine, etc using a set
 
 
 
@@ -44,5 +45,5 @@ if __name__ == "__main__":
             x += 1
         y += 1
     # print(COORDS)
-    print(f"Part 1: {part1(COORDS)}") # 6202 too high
-    print(f"Part 2: {part2(DATA)}")
+    print(f"Part 1: {sum((COORDS[x] + 1) for x in part1(COORDS))}") # 6202 too high sum((nums[x] + 1) for x in lows)
+    print(f"Part 2: {part2(COORDS)}")
