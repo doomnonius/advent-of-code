@@ -1,4 +1,5 @@
 from typing import List, Dict, Tuple
+import math
     
 def neighbors(t: Tuple):
     x, y = t
@@ -14,7 +15,7 @@ def part1(nums: Dict[Tuple[int,int], int]) -> int:
                     bad = True
                     break
             except KeyError:
-                if test: print(f"key error") # nothing
+                if test: print(f"key error")
         if not bad:
             if test: print(f"pt: {pt} adding: {nums[pt] + 1}")
             lows.append(pt)
@@ -23,10 +24,28 @@ def part1(nums: Dict[Tuple[int,int], int]) -> int:
 
 def part2(nums: Dict[Tuple[int,int], int]) -> int:
     lows = part1(nums)
+    highs = []
     # find each neighbor that isn't nine, then each neighbor of that that isn't nine, etc using a set
-
-
-
+    for pt in lows:
+        checked = set()
+        new_pts = [pt]
+        while new_pts:
+            next_pts = []
+            for p in new_pts:
+                for n in neighbors(p):
+                    if n in checked:
+                        continue
+                    try:
+                        if nums[n] < 9:
+                            next_pts.append(n)
+                    except KeyError:
+                        if test: print(f"key error")
+            checked = checked.union(set(new_pts))
+            new_pts = next_pts.copy()
+        highs.append(len(checked))
+    highs.sort()
+    if test: print(highs)
+    return highs[-3:]
 
 if __name__ == "__main__":
     import os, timeit
@@ -35,7 +54,6 @@ if __name__ == "__main__":
     if test: INPUT_FILE = Path(__file__).with_suffix(".testinput")
     else: INPUT_FILE = Path(__file__).with_suffix(".input")
     DATA = INPUT_FILE.read_text().strip().split()
-    # print(DATA)
     COORDS = {}
     y = 0
     for row in DATA:
@@ -44,6 +62,5 @@ if __name__ == "__main__":
             COORDS[(x, y)] = int(DATA[y][x])
             x += 1
         y += 1
-    # print(COORDS)
     print(f"Part 1: {sum((COORDS[x] + 1) for x in part1(COORDS))}") # 6202 too high sum((nums[x] + 1) for x in lows)
-    print(f"Part 2: {part2(COORDS)}")
+    print(f"Part 2: {math.prod(part2(COORDS))}")
