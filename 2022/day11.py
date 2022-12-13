@@ -61,11 +61,12 @@ def part2(nums: List[int]) -> int:
 if __name__ == "__main__":
     import os, timeit
     from pathlib import Path
-    test = True
+    test = False
     if test: INPUT_FILE = Path(__file__).with_suffix(".testinput")
     else: INPUT_FILE = Path(__file__).with_suffix(".input")
     DATA = INPUT_FILE.read_text().strip().split('\n\n')
     MONKEYS = {x:Monkey(DATA[x]) for x in range(len(DATA))}
     print(MONKEYS)
     print(f"Part 1: {part1(MONKEYS, 20)}")
+    MONKEYS = {x:Monkey(DATA[x]) for x in range(len(DATA))}
     print(f"Part 2: {part1(MONKEYS, 10000, True)}")
