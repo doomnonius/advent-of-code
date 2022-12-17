@@ -23,18 +23,22 @@ def recurse(a, b, i) -> int:
     if not a and not b:
         return 2
     while type(a[0]) != type(b[0]):
-            if type(a[0]) == list:
-                b[0] = [b[0]]
-            else:
-                a[0] = [a[0]]
+        if type(a[0]) == list:
+            b[0] = [b[0]]
+        else:
+            a[0] = [a[0]]
     if type(a[0]) == int: # comparing ints
         if a[0] < b[0]:
             return 1
         elif a[0] > b[0]:
             return 0
         else:
-            if len(a) > 1 and len(b) > 1:
-                return recurse(a[1:], b[1:], i)
+            # if len(a) > 1 and len(b) > 1:
+            a.pop(0)
+            b.pop(0)
+            return recurse(a, b, i)
+            # else:
+            #     return recurse(a[1:], b[1:], i)
     # don't need as else, but here is for lists
     if type(a[0]) == list:
         # if not a[0] and not b[0]:
