@@ -51,3 +51,4 @@ if __name__ == "__main__":
     point_map = part1(COORDS, end, adj)
     print(f"Part 1: {point_map[start]}") # not 337
     print(f"Part 2: {min([v for k,v in point_map.items() if COORDS[k] == 0])}")
+    print(f"Time: {timeit.timeit('part1(COORDS, end, adj)', setup='from __main__ import part1, COORDS,end, adj', number = 10)/10}")
