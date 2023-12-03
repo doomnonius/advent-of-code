@@ -13,69 +13,21 @@ def check_valid(floors: Dict, expected:int) -> bool:
         return 9999
     for i in range(1,5):
         p = floors[i] # present
-        t = [x[1] for x in p] # types
-        if "M" in t:
-            if len(p) > 1 and "G" in t:
-                if ("1M" in p and "1G" not in p) \
-                or ("2M" in p and "2G" not in p) \
-                or ("3M" in p and "3G" not in p) \
-                or ("4M" in p and "4G" not in p) \
-                or ("5M" in p and "5G" not in p):
+        generators = {g for g in p if g[1] == "G"}
+        if generators:
+            for chip in (m for m in p if m[1] == "M"):
+                if f"{chip[0]}G" not in generators:
                     return False
     return True
 
 def part1(floors: Dict, steps:int = 0, test:bool = False) -> int:
-    """ get generators as up as possible as quickly as possible
-    first bring two microchips up, then bring one down (it will be safe)
-    then bring both gens up (leaving the chip), then bring matching gen down to missing chip
-    ***rule: when moving down, take one thing AMAP
-    ***rule: when moving up, take 2 things AMAP
-    ***rule: if you have two pairs, the only thing it's safe to bring is one M, both Ms, or both Gs
-    1: PoG and PrG to floor 2
-    2: Pos to fl 3
-    
-    ***3: PoG to fl 2
-    4: PoG and PrG to fl 3
-    5: PoM to fl 2
-    6: PoM and PrM to fl 3
-    7: Pos to fl 4
-    8: PoG to fl 3
-    9: PoG and PrG to fl 4 (fl 4 is Pos, PrG; 3 is PrM)
-    10: PrG to fl 3 (Pos on 4, Prs on 3)
-    ***
-
-    ***3: Pos to fl 4 (PoM on fl 4!)
-    4: PoG to fl 3
-    5: PoG to fl 2
-    6: Prs to fl 3
-    7: PrG to fl 2
-    8: PrG and PoG to fl 3
-    9: PrG and PoG to fl 4 (fl 4 is Pos, PrG; fl 3 is PrM; fl 2 empty; fl 1 Ths, Rus, Cos)
-    10: PoM to fl 3
-    11: PoM and PrM to fl 4
-    12: Prs to fl 3 (fl 4 is Pos)***
-
-    13-14: PrG to fl 1
-    15: Ths to fl 2
-    16: ThG to fl 1
-    17-18: PrG and ThG to fl 3 (ThM on 2)
-    19: PrM to 2
-    20: ThM to 3
-    21: PrG and ThG to 4 (ThM on 3, PrM on 2)
-    22: ThG to 3
-    23: Ths to 4 (Ths and Pos on 4)
-    24-25: PrG to 2
-    26: Prs to 3
-    27-39: repeat 13-25 to get Cos to fl 4 (Ths, Pos, Cos, PrG on 4; PrM on 2, Rus on 1)
-    40: PrG to 1
-    41-3: PrG and RuG to 4
-    44-5: PrG to 2
-    45-6: Prs to 4
-    47-49: PrM to 1
-    50-52: PrM and RuM to 4
-    manual solution not working; try to discover all paths and pick shortest
+    """
     1) for each situation, discover all legal moves and branch (am I thinking toward a recursive solve? yeah...)
     2) but I also need previous states to be remembered, so repeated states mean fails
+    based off of Peter's code, I think I have a good path forward:
+    1) make a way to hash each setup, and save hashes to check for one we've seen before
+    2) don't do recursive. Use a prioritized heap instead.
+    I think I can use most of my current code to make this happen
     """
     # if test:
     #     if steps > 0: print("forked!")
@@ -140,7 +92,7 @@ def part1(floors: Dict, steps:int = 0, test:bool = False) -> int:
                     3: floors[3].copy(),
                     4: floors[4].copy()
                     }
-        # given that I have the instructions saved, I should be able to make a check to prevent
+        # given that I have the instructions saved, I should be able to make a check to prevent \
         # undoing the move that just happened. Don't think this will really help my run times all that much though
         if up < 5:
             floors[up].append(i)
