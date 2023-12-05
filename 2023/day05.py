@@ -113,4 +113,6 @@ if __name__ == "__main__":
     maps = [Map(x) for x in DATA[1:]]
     print(f"Part 1: {part1(seeds, maps, test)}")
     # seeds = process_data([int(x) for x in DATA[0].split(":")[1].split()])
+    start = datetime.now()
     print(f"Part 2: {part2(seeds, maps, 100000)}")
+    print(f"run time: {datetime.now()-start}")
