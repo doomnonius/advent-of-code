@@ -7,7 +7,6 @@ class Map:
         self.ranges = []
         for line in data[1:]:
             self.ranges.append([int(x) for x in line.split()])
-        # print(self.ranges)
     
     def mapping(self, x:int) -> int:
         for r in self.ranges:
@@ -19,46 +18,29 @@ class Map:
 def part1(seeds: Set[int], maps: List[Map], test:bool=False) -> int:
     locs = []
     for s in seeds:
-        # print(f"seeds: {len(seeds)}")
-        start = datetime.now()
         for m in maps:
             s = m.mapping(s)
         locs.append(s)
-        end = datetime.now()
-        # print(f"seed mapped in time {end-start}! with {len(seeds)} this will take about {(end-start)*len(seeds)}")
-    if test: print(locs)
     return min(locs)
 
-def process_data(seeds: List[int]) -> Set[int]:
-    r = set()
-    s = 0
-    while s < len(seeds): #for s in seeds[0::2]:
-        start = datetime.now()
-        for offset in range(seeds[s+1]):
-            r.add(seeds[s] + offset)
-        s += 2
-        end = datetime.now()
-        av = (end-start/seeds[s-1])
-        # print(f"{seeds[s-1]} seeds took {end-start} time to expand out, an average of {av} per seed. with {sum[seeds[1::2]]} total seeds, that would take {av*sum[seeds[1::2]]} seconds")
-    print(r)
-    return r
-
-def part2(seeds: List[int], maps: List[Map], skip:int) -> int:
-    # idea for tomorrow: reverse engineer (in retrospect also seems too computationally intense) OR sample every 1,000,000 and narrow scope?
-    starts = seeds[0::2]
-    offsets = seeds[1::2]
-    dicts: List[Dict] = []
+def narrow_range(starts: List[int], offsets: List[int], maps: List[Map], skip:int) -> Tuple[List[int], List[int], List[Dict]]:
+    """ sample every 1,000,000 and narrow scope to 3 lowest scored dictionaries, sampling based off every 1000 from that smaller range, finally by 1s
+        this solution was inspired by the idea of a binary sort
+    """
+    dicts = []
     for i in range(len(starts)):
         locs = dict()
         s = set(range(starts[i],starts[i]+offsets[i],skip))
         for i in s:
             locs[i] = part1({i}, maps)
         dicts.append(locs)
-        # for k in keys:
-        #     print(f"k:{k}, v:{locs[k]}")
-    dicts.sort(key=lambda x: min([v for v in x.values()]))
-    ranges:List[Tuple] = []
-    for d in dicts[0:3]:
+    dicts.sort(key=lambda x: min([v for v in x.values()])); print(f"size {len(dicts)} [37]")
+    top = len(dicts) // 3
+    if top < 1: top = 1
+    dicts = dicts[0:top]
+    new_starts: List[int] = []
+    new_offsets: List[int] = []
+    for d in dicts:
         # find the minimum value; find the numbers before and after the seed that leads to it, and run again at skip of 1000, then at 1
         k = sorted(d.keys())
         mid = min([v for v in d.values()])
@@ -66,39 +48,27 @@ def part2(seeds: List[int], maps: List[Map], skip:int) -> int:
         mid = reversed[mid]
         l = k.index(mid)
         if 0 < l < (len(k)-1):
-            ranges.append((k[l-1],k[l+1]))
+            new_starts.append(k[l-1])
+            new_offsets.append(k[l+1]-k[l-1])
         elif l == 0:
-            ranges.append((k[l], k[l+1]))
+            new_starts.append(k[l])
+            new_offsets.append(k[l+1]-k[l])
         else:
-            ranges.append((k[l-1], k[l]+1))
+            new_starts.append(k[l-1])
+            new_offsets.append(k[l]+1-k[l-1])
+    return new_starts, new_offsets, dicts
+
+def part2(seeds: List[int], maps: List[Map], skip:int) -> int:
     dicts: List[Dict] = []
-    for r in ranges:
-        locs = dict()
-        s = set(range(r[0],r[1],1000))
-        for i in s:
-            locs[i] = part1({i}, maps)
-        dicts.append(locs)
-    dicts.sort(key=lambda x: min([v for v in x.values()]))
-    d = dicts[0]
-    k = sorted(d.keys())
-    mid = min([v for v in d.values()])
-    reversed = {v:k for k,v in d.items()}
-    mid = reversed[mid]
-    l = k.index(mid)
-    if 0 < l < (len(k)-1):
-        narrowed = (k[l-1],k[l+1])
-    elif l == 0:
-        narrowed = (k[l], k[l+1])
-    else:
-        narrowed = (k[l-1], k[l]+1)
-    s = set(range(narrowed[0],narrowed[1]))
+    starts = seeds[0::2]
+    offsets = seeds[1::2]
+    while True:
+        starts, offsets, dicts = narrow_range(starts, offsets, maps, skip)
+        skip//=1000
+        if len(dicts) == 1:
+            break
+    s = set(range(starts[0],starts[0]+offsets[0]))
     return part1(s, maps)
-
-    # select the three ranges with the lowest numbers to do the process again at 1000
-    # print(min([v for v in locs.values()]))
-    # return min(locs)
-
-
 
 
 if __name__ == "__main__":
@@ -112,7 +82,6 @@ if __name__ == "__main__":
     seeds = [int(x) for x in DATA[0].split(":")[1].split()]
     maps = [Map(x) for x in DATA[1:]]
     print(f"Part 1: {part1(seeds, maps, test)}")
-    # seeds = process_data([int(x) for x in DATA[0].split(":")[1].split()])
     start = datetime.now()
-    print(f"Part 2: {part2(seeds, maps, 100000)}")
+    print(f"Part 2: {part2(seeds, maps, 1000000)}")
     print(f"run time: {datetime.now()-start}")

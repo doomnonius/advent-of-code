@@ -5,3 +5,5 @@
 *.testinput
 2018/*.py
 peter*.py
+caleb*.py
+*.input
