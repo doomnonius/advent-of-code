@@ -1,5 +1,4 @@
 from typing import List
-from collections import defaultdict
 import functools
 
 v = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]
