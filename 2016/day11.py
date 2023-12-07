@@ -7,11 +7,13 @@ def hash_floors(floors: Dict) -> Tuple[str]:
     t = []
     for i in range(1,5):
         if floors["E"] == i:
-            p = frozenset(floors[i] | {"E"})
+            # p = frozenset(floors[i] | {"E"})
+            p = [1 for x in floors[i] if x[1] == "G"] + [2 for x in floors[i] if x[1] == "M"] + [3]
         else:
-            p = frozenset(floors[i])
+            # p = frozenset(floors[i])
+            p = [1 for x in floors[i] if x[1] == "G"] + [2 for x in floors[i] if x[1] == "M"]
         # I definitely need to know which floor the elevator is on
-        t.append(tuple(sorted(tuple(p))))
+        t.append(tuple(sorted(p)))
     # print(tuple(t))
     return tuple(t)
 
@@ -46,6 +48,7 @@ def move_elevator(floors:Dict,count:int,test:bool = False):
     """ there are a lot of moves that are functionally equivalent - eg if you have three pairs of G+M on a floor,
         the one you choose to move isn't actually a truly unique decision
         or if you choose two Ms from those three, if also doesn't matter
+        IMPLEMENT THIS AT THE HASH LEVEL
         just realized that's what I was confused about in Peter's hashing algorythm: he's converting to numbers
         and I think I might be able to something similar
     """
@@ -140,6 +143,6 @@ The fourth floor contains nothing relevant."""
     heap_length = []
     print(DATA)
     start = datetime.now()
-    print(f"Part two: {part1(DATA, test=True)}") # getting 65 currently, which is wrong
+    print(f"Part two: {part1(DATA, test=False)}") # getting 65 currently, which is wrong
     print(f"Solve time: {datetime.now()-start}")
     print(f"Max heap size: {max(heap_length)}; # of seen buildings: {len(hist)}")
