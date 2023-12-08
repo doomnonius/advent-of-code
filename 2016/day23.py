@@ -92,7 +92,7 @@ def part1(inp: List[Instruction], regs = {}, p2 = False) -> int:
 	while i < l:
 		i = inp[i].execute(regs, inp, i, p2)
 	# notes:
-	# i 2-9 is a = a * b
+	# i 2-9 is a = a * b - this is part that needed to be optimized - manually multiplying 9 digit numbers by adding one number at a time is ... not efficient
 	# instruction in i[10] to dec b is important
 	# i 11-15 is c = b * 2, then 16 toggles the instruction c away
 	# i 17 sets c to -16, then i 18 jumps us to i 2
