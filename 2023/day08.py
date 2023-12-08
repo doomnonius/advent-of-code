@@ -41,7 +41,8 @@ def part2(steps: str, nodes: List[Node]) -> int:
             count += 1
             assert len(current_nodes) == len(next_nodes)
             current_nodes = next_nodes
-            if {k[-1] for k in node_dict.keys()} == {"Z"}:
+            check = {k[-1] for k in node_dict.keys()}
+            if len(check) == 1 and check == {"Z"}:
                 return count
 
 
