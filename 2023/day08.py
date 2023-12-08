@@ -1,4 +1,5 @@
-from typing import List, Dict
+from typing import List
+from math import gcd
 
 class Node:
     def __init__(self, inp: str) -> None:
@@ -25,25 +26,39 @@ def part1(steps: str, nodes: List[Node]) -> int:
             if current_node.id == "ZZZ":
                 return count
 
+def lcm(x: int, y: int) -> int:
+    if gcd(x, y) > 1:
+        return (x * y) // gcd(x, y)
+    else:
+        return (x * y)
+
 def part2(steps: str, nodes: List[Node]) -> int:
-    # needs optimization
+    # needs optimization: idea is the "bus solution", find each individual loop, calculate LCM, ???, profit
     node_dict = {x.id:x for x in nodes}
-    current_nodes = [x for x in nodes if x.id[-1] == "A"]
+    starting_nodes = [x for x in nodes if x.id[-1] == "A"]
+    z_map = {x:[] for x in starting_nodes}
     count = 0
-    while True:
-        for i in range(len(steps)):
-            next_nodes = []
-            for node in current_nodes:
+    for x in starting_nodes:
+        next_node = x
+        zs = z_map[x]
+        while count < 100000:
+            for i in range(len(steps)):
                 if steps[i] == "L":
-                    next_nodes.append(node_dict[node.left])
+                    next_node = node_dict[next_node.left]
                 else:
-                    next_nodes.append(node_dict[node.right])
-            count += 1
-            assert len(current_nodes) == len(next_nodes)
-            current_nodes = next_nodes
-            check = {k[-1] for k in node_dict.keys()}
-            if len(check) == 1 and check == {"Z"}:
-                return count
+                    next_node = node_dict[next_node.right]
+                count += 1
+                if next_node.id[-1] == "Z":
+                    zs.append(count)
+        count = 0
+    stops = [min(x) for x in z_map.values()]
+    r = stops[0]
+    for i in range(1,len(stops)):
+        l = lcm(r, stops[i])
+        r = l
+    return r
+
+
 
 
 
