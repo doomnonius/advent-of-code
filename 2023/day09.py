@@ -8,16 +8,12 @@ class Sequence:
         for i in range(len(self.ords)-1,0,-1):
             next = self.ords[i-1]
             next.append(self.ords[i][-1] + next[-1])
-        # print(self.ords[0])
     
     def extra_backwards(self) -> int:
         ords_b = [x[::-1] for x in self.ords]
-        # for x in ords_b:
-            # print(x)
         for i in range(len(ords_b)-1,0,-1):
             next = ords_b[i-1]
             next.append(next[-1] - ords_b[i][-1])
-        # print(ords_b[0])
         return ords_b[0][-1]
          
 
@@ -25,13 +21,8 @@ def part1(data: List[Sequence]) -> int:
     return sum(x.ords[0][-1] for x in data)
 
 
-
-
-
 def part2(data: List[Sequence]) -> int:
     return sum(x.extra_backwards() for x in data)
-
-
 
 
 if __name__ == "__main__":
