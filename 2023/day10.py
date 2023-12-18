@@ -130,6 +130,13 @@ squeeze = { # always look "right" relatively speaking
         }
 }
 
+next_state = {
+    4:1,
+    3:4,
+    2:3,
+    1:2
+}
+
 def part2(data: Dict[Coord,Pipe], visited: Set[Coord], test: bool = False) -> int:
     """ Latest though: can I make a mapping function with "squeeze between" functionality?
         If I have that, then I can go around the edge of the map, and find all "." and map from each one,
@@ -144,49 +151,64 @@ def part2(data: Dict[Coord,Pipe], visited: Set[Coord], test: bool = False) -> in
         d = loc.neighbors()
         for n in d.keys(): # u, d, l, r
             if d[n] in data.keys():
+                if test: print(f"{n}: {d[n]}")
                 # at this point, if we have a state established, we should not be adding all neighbors to stack
                 if data[d[n]].data == ".":
-                    if n not in history:
-                        stack.append((d[n], 0))
-                        print(f"just added {stack[-1]} to stack")
+                    if state:
+                        if state == 4 and n == "r":
+                            stack.append((d[n], 0))
+                            if test: print(f"just added {stack[-1]} to stack [next_moves1]")
+                        elif state == 3 and n == "u":
+                            stack.append((d[n], 0))
+                            if test: print(f"just added {stack[-1]} to stack [next_moves2]")
+                        elif state == 2 and n == "l":
+                            stack.append((d[n], 0))
+                            if test: print(f"just added {stack[-1]} to stack [next_moves3]")
+                        elif state == 1 and n == "d":
+                            stack.append((d[n], 0))
+                            if test: print(f"just added {stack[-1]} to stack [next_moves4]")
+                    else:
+                        if n not in history:
+                            stack.append((d[n], 0))
+                            if test: print(f"just added {stack[-1]} to stack [next_moves5]")
                 else:
                     if not state:
-                        # determine the state if this is the first time we've hit
-                        if n == "u": state = 4
-                        elif n == "d": state = 2
-                        elif n == "l": state = 3
-                        elif n == "r": state = 1
-                    for s in find_state(d[n], state):
-                        if n not in history:
-                            stack.append((d[n], s))
-                            print(f"just added {stack[-1]} to stack")
+                        # this part needs to check which direction we're hitting from so we don't go inside
+                        # for example, if we hit an "F" while moving right, we shouldn't add it to the stack
+                        # with state 1, but we should turn right to state 2
+                        if n == "u": new_state = 4
+                        elif n == "d": new_state = 2
+                        elif n == "l": new_state = 3
+                        elif n == "r": new_state = 1
+                        stack.append((d[n], new_state))
+                        if test: print(f"just added {stack[-1]} to stack [next_moves6]")
+                    else: # scenario where both current point and the neighbor we are looking at are pipes
+                        # data[d[n]].data, data[d[right]].data
+                        # this is not how I want to implement this
+                        if squeeze_between(data[loc].data, data[d[n]].data, state):
+                            # if false is returned, coord = this one and state = next state
+                            # if true is returned, turn relative left
+                            # stack.append((, state))
+                            if test: print(f"just added {stack[-1]} to stack [next_moves7]")
+                        else:
+                            if d[n] not in history:
+                                stack.append((d[n], next_state[state]))
+                                if test: print(f"just added {stack[-1]} to stack [next_moves8]")
     
-    def find_state(c: Coord, state: int) -> List[int]:
-        """ determines what potential states can be next returned as a list
-        up: 4, down: 2, left: 3, right: 1
+    def squeeze_between(pos: str, comp: str, state: int) -> bool:
+        """ should simply return whether two chars can be squeezed between
         """
-        comp_list = squeeze[data[c].data]
-        if state == 4:
-            comp = c.right()
-        elif state == 3:
-            comp = c.up()
-        elif state == 2:
-            comp = c.left()
-        elif state == 1:
-            comp = c.down()
+        if test: print(f"in squeeze_between with pos: {pos}, comp: {comp} and state: {state}")
+        comp_list = squeeze[pos]
+        if comp == "." or pos == ".":
+            # if d not in history:
+            #     stack.append((comp, 0))
+            #     print(f"just added {stack[-1]} to stack [find_state]")
+            raise Exception("No '.' should be received as input.")
+        if comp in comp_list:
+            return True
         else:
-            print(f"find_state called with invalid state input {state}")
-            return []
-        d = data[comp].data
-        if d == ".":
-            if d not in history:
-                stack.append((comp, 0))
-                print(f"just added {stack[-1]} to stack")
-            return [state]
-        if d in comp_list:
-            return [state]
-        else:
-            return comp_list
+            return False
 
 
     for k in data.keys():
@@ -216,7 +238,7 @@ def part2(data: Dict[Coord,Pipe], visited: Set[Coord], test: bool = False) -> in
                 history.add(co)
                 next_moves(co, state)
 
-
+    if test: print(f"{set(data.keys()) - (visited | history)}")
     return len(data) - len(visited | history)
 
 
