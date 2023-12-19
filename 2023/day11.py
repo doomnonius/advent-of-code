@@ -1,7 +1,14 @@
-from typing import List
+from typing import List, Set, Tuple
+from day10 import Coord
+
+stack: List[Tuple[int, Coord]] = []
+history: Set[Coord] = set()
+
+
 
 def part1(nums: List[int]) -> int:
-    return
+    # thought: record which segments are "expanded" and each time the path goes through one, increment the step counter by one
+	return
 
 
 
