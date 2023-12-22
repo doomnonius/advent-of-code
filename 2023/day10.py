@@ -65,80 +65,79 @@ class Pipe:
         return f"{self.loc.x, self.loc.y}: {self.data}"
 
 def part1(data: Dict[Coord,Pipe], test:bool = False) -> int:
-    s = [x for x in data.values() if x.data == "S"][0]
-    connections = [x for x in data.values() if s.loc in x.neighbors]
+    s: Pipe = [x for x in data.values() if x.data == "S"][0]
+    connections: List[Pipe] = [x for x in data.values() if s.loc in x.neighbors]
     s.next, s.last = connections[0], connections[1]
     s.neighbors = connections
-    s.data = "L"
-    if test: print(f"s.data: {s.data}")
-    one, two = s.next.loc, s.last.loc
+    # define s.data
+    con_locs = [x.loc for x in connections]
+    if s.loc.up() in con_locs:
+        if s.loc.down() in con_locs:
+            s.data = "|"
+        elif s.loc.right() in con_locs:
+            s.data = "L"
+        elif s.loc.left() in con_locs:
+            s.data = "J"
+    elif s.loc.down() in con_locs:
+        if s.loc.right() in con_locs:
+            s.data = "F"
+        elif s.loc.left() in con_locs:
+            s.data = "7"
+    elif s.loc.right() in con_locs:
+        if s.loc.left() in con_locs:
+            s.data = "-"
+    assert s.data != "S", "WARNING! S.data not properly set"
+    one, two = s.next.loc, s.last.loc # one is next, last, two is last, next
     count = 1
     visited = {s.loc}
     while one != two:
         new_one = 0
         for x in data[one].neighbors:
             if x not in visited:
+                data[one].next = data[x]
                 new_one = x
+            else:
+                data[one].last = data[x]
         assert new_one, f"next ONE not found at {one}, see {data[one].neighbors}"
         new_two = 0
         for x in data[two].neighbors:
             if x not in visited:
+                data[two].last = data[x]
                 new_two = x
+            else:
+                data[two].next = data[x]
         assert new_two, f"next TWO not found at {two}, see {data[two].neighbors}" 
         visited.add(one)
         visited.add(two)
         one = new_one
         two = new_two
         count += 1
-    if test: s.data = "F"
+    visited.add(one)
+    for x in data[one].neighbors:
+        if data[one] == data[x].next:
+            data[one].last = data[x]
+        else:
+            data[one].next = data[x]
+    # test that we properly loop
+    loop_count = 0
+    loop_start = s
+    next_one = s.next
+    while next_one != loop_start:
+        next_one = next_one.next
+        loop_count += 1
+        if loop_count > 100000:
+            print("Error! Infinite loop!")
     return count, visited
 
-history = set()
-stack: List[Tuple[Coord, int]] = [] # don't need to track # of steps, but may need to track state while squeezing
-squeeze = { # always look "right" relatively speaking
-    "|" : { # this part will basically function like a state machine?
-        4 : ["|", "F", "L"],
-        2 : ["|", "7", "J"],
-        3 : [4], # stops movement in either L or R, but could turn either way
-        1 : [2]
-        }, # J|F-L7
-    "F" : {
-        4 : [1], # stops movement up, but could turn right sometimes
-        2 : ["|", "7", "J"],
-        3 : ["J", "L", "-"],
-        1 : [2] # stops movement right, but could turn either way
-        }, # J|F-L7
-    "L" : {
-        4 : [1], # stops movement up, but can turn either way
-        2 : ["|", "7", "J"],
-        3 : [4], # stops movement left, but can turn right
-        1 : ["-", "7", "F"]
-        }, # J|F-L7
-    "J" : {
-        4 : ["|", "F", "L"],
-        2 : [3], # stops movement down but can turn one way
-        3 : [4], # stops movement left but can turn either way
-        1 : ["-", "7", "F"]
-        }, # J|F-L7
-    "7" : {
-        4 : ["|", "F", "L"],
-        2 : [3], # stops movement down but can turn either way
-        3 : ["J", "L", "-"],
-        1 : [2] # stops movement right but can turn one way
-        }, # J|F-L7
-    "-" : {
-        4 : [1], # stops movement up, but can turn either way
-        2 : [3], # stops movement up, but can turn either way
-        3 : ["J", "L", "-"],
-        1 : ["-", "7", "F"]
-        },
-}
+history: Set[Coord] = set()
+stack: List[Coord] = [] # don't need to track # of steps
+around: List = []
 
 dot_dir = {
-    "u" : ["J", "|", "7"],
-    "d" : ["F", "|", "L"],
-    "l" : ["7", "-", "F"],
-    "r" : ["L", "-", "J"]
+    "u" : ["J"],# "|", "7"],
+    "d" : ["F"],# "|", "L"],
+    "l" : ["7"],# "-", "F"],
+    "r" : ["L"]#, "-", "J"]
     }
 
 next_state = {
@@ -155,32 +154,142 @@ def part2(data: Dict[Coord,Pipe], visited: Set[Coord], test: bool = False) -> in
         length(total) - (visited | history).
     """
 
-    def next_moves(loc: Coord, state: int) -> None:
+    #used output() to bug test when test input gave right answer and real input didn't
+    def output() -> None:
+        if test:
+            count = 10
+        else:
+            count = 140
+        for k in data.keys(): # thankfully the keys are sorted properly
+            # if in history but not visited, make O, else I
+            d = data[k].data
+            count -= 1
+            if k in visited:
+                print(d, end="")
+            elif k in history:
+                print("O", end="")
+            else:
+                print("I", end="")
+            if count == 0:
+                print()
+                if test: count = 10
+                else: count = 140
+
+    def perimeter(p: Pipe, dir: int) -> None:
+        """ walks along the perimeter of the pipes, adding all "."s to the stack
+        """
+        curr_pipe = p
+        assert dir > 0, f"dir is {dir}"
+        # safe to assume that I will move at least one more step in direction already heading
+        if dir == 1:
+            if curr_pipe.next.loc == curr_pipe.loc.right():
+                next_pipe = curr_pipe.next
+            else:
+                # completely reverse the direction of the loop
+                for v in data.values():
+                    if v.data != ".":
+                        v.next, v.last = v.last, v.next
+                next_pipe = curr_pipe.next
+                assert next_pipe.loc == curr_pipe.loc.right(), "Neither next nor last is to the right."
+        elif dir == 2:
+            if curr_pipe.next.loc == curr_pipe.loc.down():
+                next_pipe = curr_pipe.next
+            else:
+                # completely reverse the direction of the loop
+                for v in data.values():
+                    if v.data != ".":
+                        v.next, v.last = v.last, v.next
+                next_pipe = curr_pipe.next
+                assert next_pipe.loc == curr_pipe.loc.down(), "Neither next nor last is down."
+        elif dir == 3:
+            if curr_pipe.next.loc == curr_pipe.loc.left():
+                next_pipe = curr_pipe.next
+            else:
+                # completely reverse the direction of the loop
+                for v in data.values():
+                    if v.data != ".":
+                        v.next, v.last = v.last, v.next
+                next_pipe = curr_pipe.next
+                assert next_pipe.loc == curr_pipe.loc.left(), "Neither next nor last is to the left."
+        elif dir == 4:
+            if curr_pipe.next.loc == curr_pipe.loc.up():
+                next_pipe = curr_pipe.next
+            else:
+                # completely reverse the direction of the loop
+                for v in data.values():
+                    if v.data != ".":
+                        v.next, v.last = v.last, v.next
+                next_pipe = curr_pipe.next
+                assert next_pipe.loc == curr_pipe.loc.up(), "Neither next nor last is up."
+        assert type(next_pipe) == Pipe, "ERROR! next_pipe not a pipe"
+        turned = True
+        temp_history: Set[Coord] = set()
+        while next_pipe != p:
+            if dir == 1:
+                comp = curr_pipe.loc.down()
+            elif dir == 2:
+                comp = curr_pipe.loc.left()
+            elif dir == 3:
+                comp = curr_pipe.loc.up()
+            elif dir == 4:
+                comp = curr_pipe.loc.right()
+            else:
+                assert False, f"invalid dir: {dir}"
+            if comp in data.keys() and data[comp].data == ".":
+                if comp not in temp_history:
+                    stack.append(comp)
+                    temp_history.add(comp)
+            # now I need to change dir if this is a corner - and only change dir
+            d = curr_pipe.data
+            if d in ["7", "L", "J", "F"] and not turned:
+                if d == "7":
+                    if dir == 4:
+                        dir = 3
+                    elif dir == 1:
+                        dir = 2
+                    else:
+                        assert False, f"d is {d} and dir is {dir}"
+                elif d == "L":
+                    if dir == 2:
+                        dir = 1
+                    elif dir == 3:
+                        dir = 4
+                    else:
+                        assert False, f"d is {d} and dir is {dir}"
+                elif d == "J":
+                    if dir == 2:
+                        dir = 3
+                    elif dir == 1:
+                        dir = 4
+                    else:
+                        assert False, f"d is {d} and dir is {dir}"
+                elif d == "F":
+                    if dir == 4:
+                        dir = 1
+                    elif dir == 3:
+                        dir = 2
+                    else:
+                        assert False, f"d is {d} and dir is {dir}"
+                turned = True
+            else:
+                curr_pipe = next_pipe
+                next_pipe = curr_pipe.next
+                turned = False
+        around.append("")
+
+    def next_moves(loc: Coord) -> None:
         """ doesn't return anything, just adds to the stack
         """
-        if test: print(f"moved into next_moves, with {loc}, state: {state}")
         d = loc.neighbors_d()
         for n in d.keys(): # u, d, l, r
             if d[n] in data.keys():
-                if test: print(f"{n}: {d[n]}")
-                n_comp = {
-                    "u": "r",
-                    "r": "d",
-                    "d": "l",
-                    "l": "u"
-                }
                 n_data = data[d[n]].data # neighbor data
                 h_data = data[loc].data # here data
-                if d[n_comp[n]] in data.keys():
-                    r_data = data[d[n_comp[n]]].data # right data
-                else:
-                    r_data = "."
                 # simplest outcome
                 if h_data == "." and n_data == ".":
                     if d[n] not in history: 
-                        stack.append((d[n], 0))
-                        if test: print(f"just added {stack[-1]} ({n_data}) to stack next_moves [1]")
-                if h_data == "." and n_data != ".":
+                        stack.append(d[n])
+                if h_data == "." and n_data != "." and not around:
                     # figure out proper state
                     new_state = 0
                     if n == "u" and n_data in dot_dir[n]: new_state = 4
@@ -188,102 +297,7 @@ def part2(data: Dict[Coord,Pipe], visited: Set[Coord], test: bool = False) -> in
                     elif n == "l" and n_data in dot_dir[n]: new_state = 3
                     elif n == "r" and n_data in dot_dir[n]: new_state = 1
                     if new_state:
-                        stack.append((d[n], new_state))
-                        if test: print(f"just added {stack[-1]} ({n_data}) to stack next_moves [2]")
-                if h_data != ".":
-                    # check if we're moving in the right direction, otherwise continue
-                    if not ((state == 4 and n == "u") or (state == 3 and n == "l") \
-                        or (state == 2 and n == "d") or (state == 1 and n == "r")):
-                        if test: print("not moving in right direction")
-                        continue
-                    if r_data != ".": # this is where we need to check if we can squeeze between
-                        if not squeeze_between(h_data, r_data, state):
-                            if test: print(f"can't squeeze betweent {h_data} and {r_data}")
-                            continue
-                        if n_data != ".":
-                            new_state = 0
-                            if n == "u" and n_data in dot_dir[n]: new_state = 4
-                            elif n == "d" and n_data in dot_dir[n]: new_state = 2
-                            elif n == "l" and n_data in dot_dir[n]: new_state = 3
-                            elif n == "r" and n_data in dot_dir[n]: new_state = 1
-                            if new_state:
-                                stack.append((d[n], new_state))
-                                if test: print(f"just added {stack[-1]} ({n_data}) to stack next_moves [3]")
-                        else: # if n_data == "."
-                            # if the neighbor is to the right and is a "." add to stack
-                            stack.append((d[n], 0))
-                            if test: print(f"just added {stack[-1]} ({n_data}) to stack next_moves [4]")
-                            continue
-                    else: # r_data == "."
-                        if d[n] not in history:
-                            if n_data == ".":
-                                stack.append((d[n], 0))
-                            else:
-                                stack.append((d[n], state))
-                            if test: print(f"just added {stack[-1]} ({n_data}) to stack next_moves [5]")
-                        else:
-                            if test: print("loc in history")
-                # at this point, if we have a state established, we should not be adding all neighbors to stack
-                """if n_data == ".":
-                    if h_data == ".":
-                        if n not in history:
-                            stack.append((d[n], 0))
-                            if test: print(f"just added {stack[-1]} to stack [next_moves5]")
-                    elif state: # ie current spot != "."
-                        if state == 4 and n == "r":
-                            stack.append((d[n], 0))
-                            if test: print(f"just added {stack[-1]} to stack [next_moves1]")
-                        elif state == 3 and n == "u":
-                            stack.append((d[n], 0))
-                            if test: print(f"just added {stack[-1]} to stack [next_moves2]")
-                        elif state == 2 and n == "l":
-                            stack.append((d[n], 0))
-                            if test: print(f"just added {stack[-1]} to stack [next_moves3]")
-                        elif state == 1 and n == "d":
-                            stack.append((d[n], 0))
-                            if test: print(f"just added {stack[-1]} to stack [next_moves4]")
-                else: # ie if this neighbor is a pipe
-                    if not state:
-                        # this part needs to check which direction we're hitting from so we don't go inside
-                        # for example, if we hit an "F" while moving right, we shouldn't add it to the stack
-                        # with state 1, but we should turn right to state 2
-                        new_state = 0
-                        if n == "u" and n_data in dot_dir[n]: new_state = 4
-                        elif n == "d" and n_data in dot_dir[n]: new_state = 2
-                        elif n == "l" and n_data in dot_dir[n]: new_state = 3
-                        elif n == "r" and n_data in dot_dir[n]: new_state = 1
-                        if new_state:
-                            stack.append((d[n], new_state))
-                            if test: print(f"just added {stack[-1]} ({n_data}) to stack [next_moves6]")
-                    else: # scenario where both current point and the neighbor we are looking at are pipes
-                        # data[d[n]].data, data[d[right]].data
-                        # this is not how I want to implement this
-                        r_data = n_comp[n]
-                        if squeeze_between(h_data, data[d[r_data]].data, state):
-                            # if false is returned, coord = this one and state = next state
-                            # if true is returned, turn relative left
-                            stack.append((d[n], state))
-                            if test: print(f"just added {stack[-1]} to stack [next_moves7]")
-                        else:
-                            if d[n] not in history:
-                                stack.append((d[n], next_state[state]))
-                                if test: print(f"just added {stack[-1]} to stack [next_moves8]")"""
-    
-    def squeeze_between(pos: str, comp: str, state: int) -> bool:
-        """ should simply return whether two chars can be squeezed between
-        """
-        if test: print(f"in squeeze_between with pos: {pos}, comp: {comp} and state: {state}")
-        comp_list = squeeze[pos]
-        if comp == "." or pos == ".":
-            # if d not in history:
-            #     stack.append((comp, 0))
-            #     print(f"just added {stack[-1]} to stack [find_state]")
-            raise Exception("No '.' should be received as input.")
-            # return False
-        if comp in comp_list[state]:
-            return True
-        else:
-            return False
+                        perimeter(data[d[n]], new_state)
 
     # main code of p2
     for k in data.keys():
@@ -292,39 +306,27 @@ def part2(data: Dict[Coord,Pipe], visited: Set[Coord], test: bool = False) -> in
     max_x = max(z.x for z in data.keys())
     max_y = max(z.y for z in data.keys())
     top = {z for z in data.keys() if z.y == 0 and data[z].data == "."}
-    if test: print(f"top: {top}")
     bottom = {z for z in data.keys() if z.y == max_y and data[z].data == "."}
-    if test: print(f"bottom: {bottom}")
     left = {z for z in data.keys() if z.x == 0 and data[z].data == "."}
-    if test: print(f"left: {left}")
     right = {z for z in data.keys() if z.x == max_x and data[z].data == "."}
-    if test: print(f"right: {right}")
     edges = top | bottom | left | right
-    if test: print(f"edges: {edges}")
     for z in list(edges):
         if z not in history:
-            if test: print(f"An item in edges is being processed: {z}")
             history.add(z)
-            next_moves(z, 0)
+            next_moves(z)
             while stack:
-                co, state = stack.pop(0)
-                if not state:
-                    if co in history:
-                        continue
+                co = stack.pop(0)
+                if co in history:
+                    continue
                 history.add(co)
-                next_moves(co, state)
-
-    if test: print(f"{set(data.keys()) - (visited | history)}")
-    if test: print(stack)
+                next_moves(co)
+    # output()
     return len(data) - len(visited | history)
-
-
-
 
 if __name__ == "__main__":
     # import os, timeit
     from pathlib import Path
-    test = True
+    test = False
     if test: INPUT_FILE = Path(__file__).with_suffix(".testinput")
     else: INPUT_FILE = Path(__file__).with_suffix(".input")
     RAW_DATA = INPUT_FILE.read_text().strip().split()
@@ -332,7 +334,6 @@ if __name__ == "__main__":
     for row in range(len(RAW_DATA)):
         for column in range(len(RAW_DATA[row])):
             DATA[Coord(column, row)] = (Pipe(RAW_DATA[row][column], Coord(column, row)))
-    print(f"total size: {len(DATA)}")
     p1, visited = part1(DATA, test)
     print(f"Part 1: {p1}") #6724 is too low; off by one b/c forgot I start
-    print(f"Part 2: {part2(DATA, visited, test)}") # not 1516, too high; somehow visited is wrong
+    print(f"Part 2: {part2(DATA, visited, test)}") # not 1516, too high; my solution was way off; 580 also too high; 387 also too high
