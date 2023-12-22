@@ -27,7 +27,10 @@ class Coord:
     def down(self):
         return Coord(self.x, self.y+1)
     
-    def neighbors(self) -> Dict:
+    def neighbors(self):
+        return [self.up(), self.down(), self.left(), self.right()]
+    
+    def neighbors_d(self) -> Dict:
         return {"u": self.up(), "d": self.down(), "l": self.left(), "r": self.right()}
 
 class Pipe:
@@ -67,7 +70,7 @@ def part1(data: Dict[Coord,Pipe], test:bool = False) -> int:
     s.next, s.last = connections[0], connections[1]
     s.neighbors = connections
     s.data = "L"
-    if test: s.data = "F"
+    if test: print(f"s.data: {s.data}")
     one, two = s.next.loc, s.last.loc
     count = 1
     visited = {s.loc}
@@ -87,6 +90,7 @@ def part1(data: Dict[Coord,Pipe], test:bool = False) -> int:
         one = new_one
         two = new_two
         count += 1
+    if test: s.data = "F"
     return count, visited
 
 history = set()
@@ -127,8 +131,15 @@ squeeze = { # always look "right" relatively speaking
         2 : [3], # stops movement up, but can turn either way
         3 : ["J", "L", "-"],
         1 : ["-", "7", "F"]
-        }
+        },
 }
+
+dot_dir = {
+    "u" : ["J", "|", "7"],
+    "d" : ["F", "|", "L"],
+    "l" : ["7", "-", "F"],
+    "r" : ["L", "-", "J"]
+    }
 
 next_state = {
     4:1,
@@ -148,13 +159,77 @@ def part2(data: Dict[Coord,Pipe], visited: Set[Coord], test: bool = False) -> in
         """ doesn't return anything, just adds to the stack
         """
         if test: print(f"moved into next_moves, with {loc}, state: {state}")
-        d = loc.neighbors()
+        d = loc.neighbors_d()
         for n in d.keys(): # u, d, l, r
             if d[n] in data.keys():
                 if test: print(f"{n}: {d[n]}")
+                n_comp = {
+                    "u": "r",
+                    "r": "d",
+                    "d": "l",
+                    "l": "u"
+                }
+                n_data = data[d[n]].data # neighbor data
+                h_data = data[loc].data # here data
+                if d[n_comp[n]] in data.keys():
+                    r_data = data[d[n_comp[n]]].data # right data
+                else:
+                    r_data = "."
+                # simplest outcome
+                if h_data == "." and n_data == ".":
+                    if d[n] not in history: 
+                        stack.append((d[n], 0))
+                        if test: print(f"just added {stack[-1]} ({n_data}) to stack next_moves [1]")
+                if h_data == "." and n_data != ".":
+                    # figure out proper state
+                    new_state = 0
+                    if n == "u" and n_data in dot_dir[n]: new_state = 4
+                    elif n == "d" and n_data in dot_dir[n]: new_state = 2
+                    elif n == "l" and n_data in dot_dir[n]: new_state = 3
+                    elif n == "r" and n_data in dot_dir[n]: new_state = 1
+                    if new_state:
+                        stack.append((d[n], new_state))
+                        if test: print(f"just added {stack[-1]} ({n_data}) to stack next_moves [2]")
+                if h_data != ".":
+                    # check if we're moving in the right direction, otherwise continue
+                    if not ((state == 4 and n == "u") or (state == 3 and n == "l") \
+                        or (state == 2 and n == "d") or (state == 1 and n == "r")):
+                        if test: print("not moving in right direction")
+                        continue
+                    if r_data != ".": # this is where we need to check if we can squeeze between
+                        if not squeeze_between(h_data, r_data, state):
+                            if test: print(f"can't squeeze betweent {h_data} and {r_data}")
+                            continue
+                        if n_data != ".":
+                            new_state = 0
+                            if n == "u" and n_data in dot_dir[n]: new_state = 4
+                            elif n == "d" and n_data in dot_dir[n]: new_state = 2
+                            elif n == "l" and n_data in dot_dir[n]: new_state = 3
+                            elif n == "r" and n_data in dot_dir[n]: new_state = 1
+                            if new_state:
+                                stack.append((d[n], new_state))
+                                if test: print(f"just added {stack[-1]} ({n_data}) to stack next_moves [3]")
+                        else: # if n_data == "."
+                            # if the neighbor is to the right and is a "." add to stack
+                            stack.append((d[n], 0))
+                            if test: print(f"just added {stack[-1]} ({n_data}) to stack next_moves [4]")
+                            continue
+                    else: # r_data == "."
+                        if d[n] not in history:
+                            if n_data == ".":
+                                stack.append((d[n], 0))
+                            else:
+                                stack.append((d[n], state))
+                            if test: print(f"just added {stack[-1]} ({n_data}) to stack next_moves [5]")
+                        else:
+                            if test: print("loc in history")
                 # at this point, if we have a state established, we should not be adding all neighbors to stack
-                if data[d[n]].data == ".":
-                    if state:
+                """if n_data == ".":
+                    if h_data == ".":
+                        if n not in history:
+                            stack.append((d[n], 0))
+                            if test: print(f"just added {stack[-1]} to stack [next_moves5]")
+                    elif state: # ie current spot != "."
                         if state == 4 and n == "r":
                             stack.append((d[n], 0))
                             if test: print(f"just added {stack[-1]} to stack [next_moves1]")
@@ -167,33 +242,32 @@ def part2(data: Dict[Coord,Pipe], visited: Set[Coord], test: bool = False) -> in
                         elif state == 1 and n == "d":
                             stack.append((d[n], 0))
                             if test: print(f"just added {stack[-1]} to stack [next_moves4]")
-                    else:
-                        if n not in history:
-                            stack.append((d[n], 0))
-                            if test: print(f"just added {stack[-1]} to stack [next_moves5]")
-                else:
+                else: # ie if this neighbor is a pipe
                     if not state:
                         # this part needs to check which direction we're hitting from so we don't go inside
                         # for example, if we hit an "F" while moving right, we shouldn't add it to the stack
                         # with state 1, but we should turn right to state 2
-                        if n == "u": new_state = 4
-                        elif n == "d": new_state = 2
-                        elif n == "l": new_state = 3
-                        elif n == "r": new_state = 1
-                        stack.append((d[n], new_state))
-                        if test: print(f"just added {stack[-1]} to stack [next_moves6]")
+                        new_state = 0
+                        if n == "u" and n_data in dot_dir[n]: new_state = 4
+                        elif n == "d" and n_data in dot_dir[n]: new_state = 2
+                        elif n == "l" and n_data in dot_dir[n]: new_state = 3
+                        elif n == "r" and n_data in dot_dir[n]: new_state = 1
+                        if new_state:
+                            stack.append((d[n], new_state))
+                            if test: print(f"just added {stack[-1]} ({n_data}) to stack [next_moves6]")
                     else: # scenario where both current point and the neighbor we are looking at are pipes
                         # data[d[n]].data, data[d[right]].data
                         # this is not how I want to implement this
-                        if squeeze_between(data[loc].data, data[d[n]].data, state):
+                        r_data = n_comp[n]
+                        if squeeze_between(h_data, data[d[r_data]].data, state):
                             # if false is returned, coord = this one and state = next state
                             # if true is returned, turn relative left
-                            # stack.append((, state))
+                            stack.append((d[n], state))
                             if test: print(f"just added {stack[-1]} to stack [next_moves7]")
                         else:
                             if d[n] not in history:
                                 stack.append((d[n], next_state[state]))
-                                if test: print(f"just added {stack[-1]} to stack [next_moves8]")
+                                if test: print(f"just added {stack[-1]} to stack [next_moves8]")"""
     
     def squeeze_between(pos: str, comp: str, state: int) -> bool:
         """ should simply return whether two chars can be squeezed between
@@ -205,12 +279,13 @@ def part2(data: Dict[Coord,Pipe], visited: Set[Coord], test: bool = False) -> in
             #     stack.append((comp, 0))
             #     print(f"just added {stack[-1]} to stack [find_state]")
             raise Exception("No '.' should be received as input.")
-        if comp in comp_list:
+            # return False
+        if comp in comp_list[state]:
             return True
         else:
             return False
 
-
+    # main code of p2
     for k in data.keys():
         if k not in visited:
             data[k].data = "."
@@ -233,12 +308,14 @@ def part2(data: Dict[Coord,Pipe], visited: Set[Coord], test: bool = False) -> in
             next_moves(z, 0)
             while stack:
                 co, state = stack.pop(0)
-                if co in history:
-                    continue
+                if not state:
+                    if co in history:
+                        continue
                 history.add(co)
                 next_moves(co, state)
 
     if test: print(f"{set(data.keys()) - (visited | history)}")
+    if test: print(stack)
     return len(data) - len(visited | history)
 
 
@@ -256,6 +333,6 @@ if __name__ == "__main__":
         for column in range(len(RAW_DATA[row])):
             DATA[Coord(column, row)] = (Pipe(RAW_DATA[row][column], Coord(column, row)))
     print(f"total size: {len(DATA)}")
-    p1, visited = part1(DATA)
+    p1, visited = part1(DATA, test)
     print(f"Part 1: {p1}") #6724 is too low; off by one b/c forgot I start
     print(f"Part 2: {part2(DATA, visited, test)}") # not 1516, too high; somehow visited is wrong
