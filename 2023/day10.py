@@ -1,9 +1,10 @@
 from typing import List, Set, Dict, Tuple
 
 class Coord:
-    def __init__(self, x, y):
+    def __init__(self, x, y, data: str= " "):
         self.x = x
         self.y = y
+        self.data = data
 
     def __eq__(self, other):
         # if not other: return False
