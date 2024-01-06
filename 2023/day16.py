@@ -1,7 +1,7 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Set
 from day10 import Coord
 
-def part1(data: Dict[Coord,str], current: Coord, dir: int) -> int:
+def part1(data: Dict[Coord,str], current: Coord, dir: int, visited: Set[Tuple[Coord, int]] = set()) -> int:
     
     def find_next(loc: Coord, dir):
         move_d = {
@@ -37,7 +37,6 @@ def part1(data: Dict[Coord,str], current: Coord, dir: int) -> int:
         for x in move_d[dir][data[loc]]:
             stack.append(x)
     
-    visited = set()
     visited.add((current, dir))
     stack: List[Tuple[Coord,int]] = []
     find_next(current, dir)
@@ -49,14 +48,14 @@ def part1(data: Dict[Coord,str], current: Coord, dir: int) -> int:
             visited.add((current, dir))
             find_next(current, dir)
     # print(visited)
-    return len({x[0] for x in visited})
+    return len({x[0] for x in visited}), visited
 
-def part2(data: Dict[Coord,str]) -> int:
+def part2(data: Dict[Coord,str], visited: Set[Tuple[Coord, int]]) -> int:
     max_x = len({x for x in data if x.y == 0})-1
     max_y = len({y for y in data if y.x == 0})-1
     edges = {(z, 1) for z in data if z.x == 0} | {(z, 2) for z in data if z.y == 0} | {(z,3) for z in data if z.x == max_x} | {(z,0) for z in data if z.y == max_y}
     assert len(edges) == 440 or len(edges) == 40, "ERROR, wrong number of edges!"
-    answers = {x:part1(data, x[0], x[1]) for x in edges}
+    answers = {x:part1(data, x[0], x[1], visited.copy())[0] for x in edges}
     print(answers)
     return max(answers.values())
 
@@ -74,6 +73,7 @@ if __name__ == "__main__":
     for row in range(len(RAW_DATA)):
         for col in range(len(RAW_DATA[row])):
             DATA[Coord(col,row)] = RAW_DATA[row][col]
-    print(f"Part 1: {part1(DATA, Coord(0,0), 1)}") # 11442 too high
+    p1, visited = part1(DATA, Coord(0,0), 1)
+    print(f"Part 1: {p1}") # 11442 too high
     start = datetime.now()
-    print(f"Part 2: {part2(DATA)} after {datetime.now()-start}") # 8330 too low
+    print(f"Part 2: {part2(DATA, visited)} after {datetime.now()-start}") # 8330 too low
