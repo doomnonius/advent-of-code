@@ -47,7 +47,6 @@ def part1(data: Dict[Coord,str], current: Coord, dir: int, visited: Set[Tuple[Co
         if current in data:
             visited.add((current, dir))
             find_next(current, dir)
-    # print(visited)
     return len({x[0] for x in visited}), visited
 
 def part2(data: Dict[Coord,str], visited: Set[Tuple[Coord, int]]) -> int:
@@ -56,11 +55,7 @@ def part2(data: Dict[Coord,str], visited: Set[Tuple[Coord, int]]) -> int:
     edges = {(z, 1) for z in data if z.x == 0} | {(z, 2) for z in data if z.y == 0} | {(z,3) for z in data if z.x == max_x} | {(z,0) for z in data if z.y == max_y}
     assert len(edges) == 440 or len(edges) == 40, "ERROR, wrong number of edges!"
     answers = {x:part1(data, x[0], x[1], visited.copy())[0] for x in edges}
-    print(answers)
     return max(answers.values())
-
-
-
 
 if __name__ == "__main__":
     from datetime import datetime
