@@ -2,8 +2,8 @@ from typing import List, Set, Dict, Tuple
 
 class Coord:
     def __init__(self, x, y, data: str= " "):
-        self.x = x
-        self.y = y
+        self.x: int = x
+        self.y: int = y
         self.data = data
 
     def __eq__(self, other):
@@ -12,6 +12,9 @@ class Coord:
 
     def __add__(self, other):
         return Coord(self.x + other.x, self.y + other.y)
+    
+    def __mul__(self, other):
+        return Coord(self.x * other, self.y * other)
 
     def __lt__(self, other):
         return self.x + self.y < other.x + other.y
