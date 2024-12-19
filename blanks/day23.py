@@ -20,7 +20,7 @@ def process_data(data: str) -> Tuple[List[str]]:
 if __name__ == "__main__":
     from datetime import datetime
     from pathlib import Path
-    from .helpers import import_files
+    from helpers import import_files
     TEST_FILE, INPUT_FILE = import_files(Path(__file__))
     TEST_DATA = process_data(TEST_FILE)
     DATA = process_data(INPUT_FILE)

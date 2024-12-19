@@ -1,30 +1,37 @@
-from typing import List, Tuple
+from typing import List
 
-def part1(nums: List[int]) -> int:
+def part1(nums: List[List[int]]) -> int:
+    r = 0
+    for row in nums:
+        if row not in [sorted(row), sorted(row, reverse=True)]:
+            continue
+        for i in range(len(row)):
+            if abs(row[i-1]-row[i]) > 2:
+                continue
+        r += 1
+    return r
+
+
+def part2(nums: List[List[int]]) -> int:
     return
 
 
 
 
-
-def part2(nums: List[int]) -> int:
-    return
-
-
-
-
-def process_data(data: str) -> Tuple[List[str]]:
-    lines = data.strip().split("\n")
-    return
+def process_data(data: str) -> List[List[int]]:
+    r = []
+    for line in data.strip().split("\n"):
+        r.append([int(x) for x in line.split()])
+    return r
 
 if __name__ == "__main__":
     from datetime import datetime
     from pathlib import Path
-    from .helpers import import_files
+    from helpers import import_files
     TEST_FILE, INPUT_FILE = import_files(Path(__file__))
     TEST_DATA = process_data(TEST_FILE)
     DATA = process_data(INPUT_FILE)
-    test_1a = 0
+    test_1a = 2
     test_2a = 0
     p1 = part1(TEST_DATA)
     p2 = part2(TEST_DATA)
