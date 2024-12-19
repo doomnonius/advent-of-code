@@ -24,7 +24,7 @@ if __name__ == "__main__":
     TEST_FILE, INPUT_FILE = import_files(Path(__file__))
     TEST_DATA = process_data(TEST_FILE)
     DATA = process_data(INPUT_FILE)
-    test_1a = 11
+    test_1a = 0
     test_2a = 0
     p1 = part1(TEST_DATA)
     p2 = part2(TEST_DATA)
