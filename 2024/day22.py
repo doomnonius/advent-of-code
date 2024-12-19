@@ -28,10 +28,10 @@ if __name__ == "__main__":
     test_2a = 0
     p1 = part1(TEST_DATA)
     p2 = part2(TEST_DATA)
-    if test_1a: assert p1 == test_1a, f"{p1} is the wrong answer"
+    if test_1a: assert p1 == test_1a, f"Part 1: {p1} is the wrong answer"
     p1 = part1(DATA)
     print(f"Part 1: {p1}")
-    if test_2a: assert p2 == test_2a, f"{p2} is the wrong answer"
+    if test_2a: assert p2 == test_2a, f"Part 2: {p2} is the wrong answer"
     p2 = part2(DATA)
     print(f"Part 2: {p2}")
     

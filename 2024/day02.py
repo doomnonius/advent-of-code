@@ -1,21 +1,18 @@
 from typing import List
 
-def part1(nums: List[List[int]]) -> int:
+def part1(nums: List[List[int]], damp=False) -> int:
     r = 0
     for row in nums:
         if row not in [sorted(row), sorted(row, reverse=True)]:
             continue
-        for i in range(len(row)):
-            if abs(row[i-1]-row[i]) > 2:
-                continue
-        r += 1
+        safe = True
+        danger = 0
+        for i in range(len(row)-1):
+            if not 0 < abs(row[i+1]-row[i]) < 4:
+                danger += 1
+                if danger > 1: safe = False
+        r += safe
     return r
-
-
-def part2(nums: List[List[int]]) -> int:
-    return
-
-
 
 
 def process_data(data: str) -> List[List[int]]:
@@ -32,12 +29,12 @@ if __name__ == "__main__":
     TEST_DATA = process_data(TEST_FILE)
     DATA = process_data(INPUT_FILE)
     test_1a = 2
-    test_2a = 0
+    test_2a = 4
     p1 = part1(TEST_DATA)
-    p2 = part2(TEST_DATA)
-    if test_1a: assert p1 == test_1a, f"{p1} is the wrong answer"
+    p2 = part1(TEST_DATA, True)
+    if test_1a: assert p1 == test_1a, f"Part 1: {p1} is the wrong answer"
     p1 = part1(DATA)
     print(f"Part 1: {p1}")
-    if test_2a: assert p2 == test_2a, f"{p2} is the wrong answer"
-    p2 = part2(DATA)
+    if test_2a: assert p2 == test_2a, f"Part 2: {p2} is the wrong answer"
+    p2 = part1(DATA,True)
     print(f"Part 2: {p2}")
