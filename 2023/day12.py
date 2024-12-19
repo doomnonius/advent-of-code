@@ -2,42 +2,10 @@ from typing import List, Tuple
 import re
 from functools import reduce
 
-def part1(data: Tuple[str, str]) -> int:
+def fresh_part1(data: Tuple[str, str]) -> int:
     r = 0
     springs, counts = data
     counts = [int(x) for x in counts.split(",")]
-    srch = r"^\.*"
-    for i in counts:
-        srch += r"#{" + f"{i}" + r"}\.+"
-    srch = srch[0:-1] + "*$"
-    if test: print(srch)
-    possibles = [""]
-    for c in springs:
-        new_possibles = []
-        if c == "?":
-            for x in possibles:
-                dot_next = x + "."
-                hash_next = x + "#"
-                if "#" in x:
-                    # if test: print(srch[0:6] + f"0,{srch[6]}" + "}")
-                    m = re.match(srch[0:6] + f"0,{srch[6]}" + "}", dot_next)
-                    if m:
-                        new_possibles.append(dot_next)
-                else:
-                    new_possibles.append(dot_next)
-                new_possibles.append(hash_next)
-        else:
-            for x in possibles:
-                new_possibles.append(x + c)
-        possibles = new_possibles.copy()
-    # if test: print(possibles)
-    for x in possibles:
-        m = re.match(srch, x)
-        if m:
-            # if test: print(m.string)
-            r += 1
-    print(f"returning {r} for {springs}")
-    return r
 
 def new_part1(springs: str, counts: List[int], test: bool = False) -> int:
 
