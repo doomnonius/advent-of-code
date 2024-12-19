@@ -10,7 +10,7 @@ def part1(nums: Tuple[List[str]]) -> int:
 
 def part2(nums: Tuple[List[str]]) -> int:
     r = 0
-    l0 = set(nums[0])
+    l0 = nums[0]
     l1 = sorted(nums[1])
     for n in l0:
         r += (n * l1.count(n))
@@ -35,7 +35,11 @@ if __name__ == "__main__":
     DATA = process_data(INPUT_FILE)
     test_1a = 11
     test_2a = 31
-    if test_1a: assert part1(TEST_DATA) == test_1a, f""
-    print(f"Part 1: {part1(DATA)}")
-    if test_2a: assert part2(TEST_DATA) == test_2a, f""
-    print(f"Part 2: {part2(DATA)}")
+    p1 = part1(TEST_DATA)
+    p2 = part2(TEST_DATA)
+    if test_1a: assert p1 == test_1a, f"{p1} is the wrong answer"
+    p1 = part1(DATA)
+    print(f"Part 1: {p1}")
+    if test_2a: assert p2 == test_2a, f"{p2} is the wrong answer"
+    p2 = part2(DATA)
+    print(f"Part 2: {p2}")
