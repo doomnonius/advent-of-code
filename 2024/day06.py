@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Set
+from helpers import Coord
 
 def part1(nums: List[int]) -> int:
     return
@@ -10,12 +11,16 @@ def part1(nums: List[int]) -> int:
 def part2(nums: List[int]) -> int:
     return
 
+def navigate()
 
-
-
-def process_data(data: str) -> Tuple[List[str]]:
+map: Set[Coord] = set()
+def process_data(data: str) -> Coord:
     lines = data.strip().split("\n")
-    return
+    for row in range(len(lines)):
+        for col in range(len(lines[row])):
+            map.add(Coord(row,col))
+            if lines[row][col] ==
+    return 
 
 if __name__ == "__main__":
     from datetime import datetime
@@ -24,7 +29,7 @@ if __name__ == "__main__":
     TEST_FILE, INPUT_FILE = import_files(Path(__file__))
     TEST_DATA = process_data(TEST_FILE)
     DATA = process_data(INPUT_FILE)
-    test_1a = 0
+    test_1a = 41
     test_2a = 0
     p1 = part1(TEST_DATA)
     p2 = part2(TEST_DATA)
