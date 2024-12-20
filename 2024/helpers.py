@@ -6,15 +6,16 @@ def import_files(day) -> Tuple[str, str]:
     return TEST_FILE, INPUT_FILE
 
 class Coord:
-    def __init__(self, x, y):
+    def __init__(self, x, y, char):
         self.x = x
         self.y = y
+        self.char = char
 
     def __repr__(self):
-        return f"{(self.x, self.y)}"
+        return f"{(self.x, self.y, self.char)}"
 
     def __add__(self, other):
-        return Coord(self.x + other.x, self.y + other.y)
+        return Coord(self.x + other.x, self.y + other.y, other.char)
 
     def __mul__(self, other: int):
         return Coord(self.x * other, self.y * other)
