@@ -34,78 +34,46 @@ turn_dict = {
     2:3,
     3:0
 }
-rev_dict = {
-    1:3,
-    3:1,
-    0:2,
-    2:0
-}
-inv_dict = {
-    0:3,
-    3:2,
-    2:1,
-    1:0
-}
+# inv_dict = {v:k for k,v in turn_dict.items()}
 
 def part2(pos: Coord, map: Dict[Coord, str], t = False) -> int:
     start = pos
     visited = set()
-    loops = set()
-    crossovers = dict()
+    blocks = set()
     d = start_dict[pos.char]
     while pos in map.keys():
         # if t: print(f"Location: {pos}")
-        visited.add(pos)
-        if pos in crossovers.keys() and d in crossovers[pos]:
-            loops.add(pos + move_dict[d])
-            if t: print(f"Added {pos + move_dict[d]} to loops")
         next_pos = pos + move_dict[d]
         try:
             if map[next_pos] == "#":
-                rev_d = rev_dict[d]
-                inv_d = inv_dict[d]
                 d = turn_dict[d]
-                rev_pos = pos
-                while rev_pos in map.keys():
-                    if rev_pos in crossovers.keys():
-                        crossovers[rev_pos].append(inv_d)
-                    else:
-                        crossovers[rev_pos] = [inv_d]
-                    # if t: print(f"added {rev_pos}: {inv_d} to crossovers!")
-                    next_rev_pos = rev_pos + move_dict[rev_d]
+            else:
+                visited.add((pos, d))
+                turn_pos = pos
+                block = pos + move_dict[d]
+                turn_d = turn_dict[d]
+                countdown = 300
+                while turn_pos in map.keys() and block in map.keys() and countdown > 0 and block != start:
+                    next_turn_pos = turn_pos + move_dict[turn_d]
                     try:
-                        if map[next_rev_pos] == "#":
-                            break
+                        countdown -= 1
+                        if map[next_turn_pos] == "#":
+                            turn_d = turn_dict[turn_d]
                         else:
-                            rev_pos =  next_rev_pos
+                            turn_pos = next_turn_pos
+                            if (turn_pos, turn_d) in visited:
+                                # if t: print(f"block: {block}")
+                                blocks.add(block)
+                                break
                     except:
                         break
-            else:
+                # if t: print(f"added ({pos}, {d})")
                 pos = next_pos
         except Exception as e:
             # if t: print(f"error: {e}")
             break
-    # pos = start
-    # d = start_dict[pos.char]
-    # # if t: print(crossovers)
-    # while pos in map.keys():
-    #     # if t: print(f"Location: {pos}")
-    #     visited.add(pos)
-    #     if pos in crossovers.keys() and d in crossovers[pos]:
-    #         if pos + move_dict[d] in map.keys() and pos + move_dict[d] != start and map[pos + move_dict[d]] != "#":
-    #             loops.add(pos + move_dict[d])
-    #         if t: print(f"Added {pos + move_dict[d]} to loops, at {pos} moving {d}")
-    #         if t: print(f"Crossovers: {crossovers[pos]}")
-    #     next_pos = pos + move_dict[d]
-    #     try:
-    #         if map[next_pos] == "#":
-    #             d = turn_dict[d]
-    #         else:
-    #             pos = next_pos
-    #     except Exception as e:
-    #         # if t: print(f"error: {e}")
-    #         break
-    return len(loops)
+    # print(blocks)
+    return len(blocks)
 
 def process_data(data: str) -> Tuple[Coord, Dict[Coord, str]]:
     map: Dict[Coord, str] = dict()
