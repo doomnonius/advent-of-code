@@ -5,6 +5,16 @@ def import_files(day) -> Tuple[str, str]:
     INPUT_FILE = day.with_suffix(".input").read_text()
     return TEST_FILE, INPUT_FILE
 
+class Chunk:
+    def __init__(self, id, s, e):
+        self.start: int = s
+        self.id: int = id
+        self.end: int = e
+        self.leng: int = self.end - self.start
+
+    def value(self):
+        return sum((self.start + r) * self.id for r in range(self.leng))
+
 class Coord:
     def __init__(self, x, y, char = "."):
         self.x = x
