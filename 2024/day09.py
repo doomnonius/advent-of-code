@@ -1,45 +1,56 @@
 from typing import List
-from helpers import Chunk
+from helpers import Chunk, Space
 
 def part1(nums: List[int], t = False) -> int:
-    r = 0
+    chunks: List[Chunk] = []
+    other_chunks: List[Chunk] = []
+    spaces: List[Space] = []
     id = 0
+    pos = 0
     i = 0
-    d = dict()
-    e = [int(x) for x in nums[1::2]]
-    for c in nums[0::2]:
-        d[id] = int(c)
+    while i < len(nums):
+        l = int(nums[i])
+        chunks.append(Chunk(id, pos, l))
         id += 1
-    # if t: print(f"d: {d}")
-    for k in d.keys():
-        # if t: print(f"key: {k}")
-        while d[k] > 0:
-            r += (k * i)
-            # if t: print(f"r: {r}")
-            d[k] -= 1
-            i += 1
-        try: empty = e.pop(0)
-        except IndexError: empty = 0
-        # if t: print(f"empty: {empty}")
-        while empty > 0:
-            try: top = max([k for k in d.keys() if d[k] > 0])
-            except: top = 0
-            # if t: print(f"top: {top}")
-            r += (top * i)
-            # if t: print(f"r: {r}")
-            d[top] -= 1
-            i += 1
-            empty -= 1
-    return r
+        try:
+            e = int(nums[i+1])
+        except:
+            break
+        pos += l
+        spaces.append(Space(pos, e))
+        pos += e
+        i += 2
+    for s in spaces:
+        for x in s.fill(chunks, t):
+            other_chunks.append(x)
+    return sum(c.value() for c in chunks) + sum(c.value() for c in other_chunks)
 
-
-
-
-
-def part2(nums: List[int]) -> int:
-    return
-
-
+def part2(nums: List[int], t = False) -> int:
+    chunks: List[Chunk] = []
+    other_chunks: List[Chunk] = []
+    spaces: List[Space] = []
+    id = 0
+    pos = 0
+    i = 0
+    while i < len(nums):
+        l = int(nums[i])
+        chunks.append(Chunk(id, pos, l))
+        id += 1
+        try:
+            e = int(nums[i+1])
+        except:
+            break
+        pos += l
+        spaces.append(Space(pos, e))
+        pos += e
+        i += 2
+    while chunks:
+        c = chunks.pop()
+        if t: print(f"{c.id}: {c.start}, {c}")
+        c.fill(spaces, t)
+        if t: print(f"{c.id}: {c.start}, {c}")
+        other_chunks.append(c)
+    return sum(c.value() for c in chunks) + sum(c.value() for c in other_chunks)
 
 
 def process_data(data: str) -> List[str]:
@@ -54,7 +65,7 @@ if __name__ == "__main__":
     DATA = process_data(INPUT_FILE)
     test_1a = 1928
     test_2a = 2858
-    p1 = part1(TEST_DATA, True)
+    p1 = part1(TEST_DATA)
     if test_1a: assert p1 == test_1a, f"Part 1: {p1} is the wrong answer"
     p1 = part1(DATA)
     print(f"Part 1: {p1}")
