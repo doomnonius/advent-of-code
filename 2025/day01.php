@@ -9,11 +9,9 @@ $t2 = 0;
 foreach ($input as $y => $i) {
 	$d = $i[0];
 	$c = intval(substr($i, 1));
-	$m = 10000;
-	while ($c >= 100) {
-		while ($c % $m == $c) $m /= 10;
-		$t2 += (intdiv($c, $m) * ($m / 100));
-		$c %= $m;
+	if ($c >= 100) {
+		$t2 += intdiv($c, 100);
+		$c %= 100;
 	}
 	if ($c == 0) {
 		if ($safe == 0) $t += 1;
@@ -28,7 +26,7 @@ foreach ($input as $y => $i) {
 		$safe += $c;
 	}
 	if ($safe < 0) $safe = 100 - abs($safe);
-	else $safe = $safe % 100;
+	else $safe %= 100;
 	if ($safe == 0) {
 		$t += 1;
 	}
